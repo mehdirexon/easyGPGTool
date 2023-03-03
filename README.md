@@ -1,23 +1,97 @@
-# GPG-GUI
-a tool that you can work with easily instead of using original library.two different version can help you choose what you need.
-this GUI version helps you to get rid of typing codes and other stuff.so you can easily do whatever just with forms.
-what you need to use this:
-## for debian 
-```
-sudo apt update && sudo apt upgrade
-sudo apt install python3 && sudo apt install python3-pip
-pip3 install -r requirements.txt
-```
-## for fedora
-```
-sudo dnf update && sudo dnf upgrade
-sudo dnf install python3 && sudo dnf install python3-pip
-pip3 install -r requirements.txt
-```
-### how to use
-you just need to compile the project after you installed required packages
+# 🔒 GPG-GUI 🔒
+## Table of Contents
 
-### beta patch note
+* [Introduction](#introduction)
+
+* [Features](#features)
+
+* [Requirements](#requirements)
+
+* [How to use](#how-to-use)
+
+* [Installation](#installation%EF%B8%8F)
+
+* [Acknowledgements](#acknowledgements)
+
+## Introduction👋
+
++ what is GPG?
+
+GPG (GNU Privacy Guard) is a free and open-source tool for encrypting and signing data and communications. It uses public-key cryptography to ensure the security and privacy of your data. With GPG, you can encrypt your files and messages so that only the intended recipient can read them, and you can also digitally sign your messages to prove their authenticity.
+
++ what is GPU GUI Tool
+
+GPG-GUI is a tool that allows you to work with GPG easily instead of using the original library. With two different versions available, you can choose the one that best fits your needs.
+This GUI version helps you to get rid of typing codes and other stuff. So you can easily do whatever just with forms. 🎉
+
+## Features💡
+Why use GPG-GUI? 💻 GPG-GUI makes it easy for anyone to use GPG for encryption and decryption without having to learn complex command-line codes. With its user-friendly interface, you can quickly and easily manage your keys and perform common tasks such as:
+
+🔒 Encrypting your data to keep it safe from prying eyes
+
+🔓 Decrypting your data quickly and easily whenever you need to access it
+
+📤 Exporting your keys to a file for easy transfer between devices
+
+📥 Importing keys from a file to quickly add them to your keychain
+
+🔑 Generating a new key with just a few clicks or deleting an existing one if you no longer need it
+
+📝 Keeping track of changes and updates with our detailed patch notes
+
+🔍 Easily viewing all your keys in one place with our show keys feature
+
+## Requirements📦
+Before running the application, make sure to install all required libraries by following the instructions in the Requirements.txt file included in the project.
+
+## How to use📖
+After installing the required packages, make sure to compile the project in order to start using GPG-GUI.
+
+## Installation🛠️
+### For Debian 
 ```
-[+] encrypt,decrypt,export,import,new key,delete key,patch note,show keys,about us were added
+sudo apt update && sudo apt upgrade 
+sudo apt install python3 && sudo apt install python3-pip 
+pip3 install -r requirements.txt
 ```
+### For Fedora
+```
+sudo dnf update && sudo dnf upgrade 
+sudo dnf install python3 && sudo dnf install python3-pip 
+pip3 install -r requirements.txt
+```
+### For Arch
+```
+sudo pacman -Syu
+sudo pacman -S python python-pip
+pip3 install -r requirements.txt
+```
+### For MacOS
+```
+xcode-select --install
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+brew install python3
+pip3 install -r requirements.txt
+```
+### CentOS/RHEL
+```
+sudo yum update
+sudo yum install python3 python3-pip
+pip3 install -r requirements.txt
+```
+### Gentoo
+```
+sudo emerge --sync && sudo emerge --update world 
+sudo emerge --ask dev-lang/python dev-python/pip 
+pip3 install -r requirements.txt
+```
+### Slackware
+```
+slackpkg update && slackpkg upgrade-all 
+slackpkg install python 
+python -m ensurepip 
+pip install --upgrade pip setuptools wheel 
+pip install -r requirements.txt
+```
+## Acknowledgements🙏
+This README.md file was improved with the assistance of Bing. 😊
