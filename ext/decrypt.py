@@ -7,7 +7,7 @@ class decryptForm(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("decrypting a file")
-        self.setFixedHeight(100)
+        self.setFixedHeight(120)
         self.setFixedWidth(300)
         #it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)

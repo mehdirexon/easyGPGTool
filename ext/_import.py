@@ -16,6 +16,7 @@ class importForm(QWidget):
         #email
         self.keyPathLabel = QLabel("public file path : ")
 
+        #key path
         self.keyPathLineEdit= QLineEdit()
         self.keyPathLineEdit.setReadOnly(True)
         self.keyPathLineEdit.textEdited.connect(self.textEdited)
@@ -51,6 +52,7 @@ class importForm(QWidget):
         H_layout.addWidget(self.openDialog)
 
         V_layout.addLayout(H_layout)
+
         V_layout.addWidget(self.passphraseLabel)
         V_layout.addWidget(self.passphraseLineEdit)
         V_layout.addWidget(self.privateKeyCB)
@@ -87,7 +89,11 @@ class importForm(QWidget):
             self.passphraseLabel.setHidden(False)
             self.passphraseLineEdit.setHidden(False)
         else:
-            self.importButton.setDisabled(False)
+            if self.keyPathLineEdit.text() != "":
+                self.importButton.setDisabled(False)
+            else:
+                self.importButton.setDisabled(True)
+            self.passphraseLineEdit.clear()
             self.keyPathLabel.setText("public key path")
             self.setFixedHeight(130)
             self.passphraseLabel.setHidden(True)

@@ -186,7 +186,7 @@ class mainWindow(QMainWindow):
             try:
                 status = GPG.decrypt(self,passphrase=self.decryptForm.passphraseLineEdit.text())
                 if status.ok is True:
-                    QMessageBox.information(self,"decrypting a file",str(status.stderr) + "\n"+ str(status.status),QMessageBox.Ok)
+                    QMessageBox.information(self,"decrypting a file",str(status.stderr) + "\n"+ str(status.status) +"\n"+ str(status.valid) +"\n"+ str(status.trust_text),QMessageBox.Ok)
                     self.sendLog("a decryption task has been successfully done",Fore.GREEN)
                 else:
                     raise Exception(status.stderr)
@@ -498,7 +498,6 @@ class GPG(mainWindow):
     @staticmethod
     def encrypt(self,email):
         permission = False
-
         if gpg.list_keys(False) == [] and gpg.list_keys(True) == []:
             raise Exception("No such key")
         #-----------------------------------------------------------
@@ -511,8 +510,12 @@ class GPG(mainWindow):
         #-----------------------------------------------------------      
         else:
             selectedFile = QFileDialog.getOpenFileName(self,"select your file","/home/" + os.getlogin() + "/Desktop")
-            with open(os.path.abspath(selectedFile[0]), 'rb') as file:
-                status = gpg.encrypt_file(file,recipients = email,output = os.path.splitext(selectedFile[0])[0] + '.safe')
+            if not self.encryptForm.signCB.isChecked():
+                with open(os.path.abspath(selectedFile[0]), 'rb') as file:
+                    status = gpg.encrypt_file(file,recipients = email,output = os.path.splitext(selectedFile[0])[0] + '.safe')
+            else:
+                with open(os.path.abspath(selectedFile[0]), 'rb') as file:
+                    status = gpg.encrypt_file(file,recipients = email,output = os.path.splitext(selectedFile[0])[0] + '.safe',sign=self.encryptForm.fingerprintLineEdit.text(),passphrase=self.encryptForm.passphraseLineEdit.text())
         return status
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
