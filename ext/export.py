@@ -67,12 +67,12 @@ class exportForm(QWidget):
     def privateCBChanged(self):
         if self.privateCB.isChecked():
             self.exportButton.setDisabled(True)
-            self.setMinimumHeight(190)
+            self.setFixedHeight(220)
             self.passphraseLabel.setHidden(False)
             self.passphraseLineEdit.setHidden(False)
         else:
             self.exportButton.setDisabled(False)
-            self.setFixedHeight(130)
+            self.setFixedHeight(170)
             self.passphraseLabel.setHidden(True)
             self.passphraseLineEdit.setHidden(True)
 #-------------------------------------------------------------------------------------------------------#
