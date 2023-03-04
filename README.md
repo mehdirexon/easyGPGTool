@@ -5,6 +5,8 @@
 
 * [Features](#features)
 
+* [Recently changes](#recently-changes)
+
 * [Requirements](#requirements)
 
 * [How to use](#how-to-use)
@@ -40,6 +42,12 @@ Why use GPG-GUI? 💻 GPG-GUI makes it easy for anyone to use GPG for encryption
 📝 Keeping track of changes and updates with our detailed patch notes
 
 🔍 Easily viewing all your keys in one place with our show keys feature
+
+## Recently changes🆕
+
++ digital signature was added
+
++ some bugs were fixed
 
 ## Requirements📦
 Before running the application, make sure to install all required libraries by following the instructions in the Requirements.txt file included in the project.
