@@ -60,38 +60,38 @@ After installing the required packages, make sure to compile the project in orde
 ```
 sudo apt update && sudo apt upgrade 
 sudo apt install python3 && sudo apt install python3-pip 
-pip3 install -r requirements.txt
+pip3 install .
 ```
 ### For Fedora
 ```
 sudo dnf update && sudo dnf upgrade 
 sudo dnf install python3 && sudo dnf install python3-pip 
-pip3 install -r requirements.txt
+pip3 install .
 ```
 ### For Arch
 ```
 sudo pacman -Syu
 sudo pacman -S python python-pip
-pip3 install -r requirements.txt
+pip3 install .
 ```
 ### For MacOS
 ```
 xcode-select --install
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew install python3
-pip3 install -r requirements.txt
+pip3 install .
 ```
 ### CentOS/RHEL
 ```
 sudo yum update
 sudo yum install python3 python3-pip
-pip3 install -r requirements.txt
+pip3 install .
 ```
 ### Gentoo
 ```
 sudo emerge --sync && sudo emerge --update world 
 sudo emerge --ask dev-lang/python dev-python/pip 
-pip3 install -r requirements.txt
+pip3 install .
 ```
 ### Slackware
 ```
@@ -99,7 +99,7 @@ slackpkg update && slackpkg upgrade-all
 slackpkg install python 
 python -m ensurepip 
 pip install --upgrade pip setuptools wheel 
-pip install -r requirements.txt
+pip install -r .
 ```
 ## Acknowledgements🙏
 This README.md file was improved with the assistance of Bing. 😊
