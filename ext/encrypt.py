@@ -7,7 +7,7 @@ class encryptForm(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("encrypting a file")
-        self.setFixedHeight(150)
+        self.setFixedHeight(130)
         self.setFixedWidth(300)
         #it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
@@ -58,7 +58,7 @@ class encryptForm(QWidget):
     def signCBChanged(self):
         if self.signCB.isChecked():
             self.encryptButton.setDisabled(True)
-            self.setFixedHeight(270)
+            self.setFixedHeight(250)
             self.passphraseLabel.setHidden(False)
             self.passphraseLineEdit.setHidden(False)
             self.fingerprintLabel.setHidden(False)
@@ -68,10 +68,9 @@ class encryptForm(QWidget):
                 self.encryptButton.setEnabled(True)
             else:
                 self.encryptButton.setDisabled(True)
-
             self.passphraseLineEdit.clear()
             self.fingerprintLineEdit.clear()
-            self.setFixedHeight(150)
+            self.setFixedHeight(130)
             self.fingerprintLabel.setHidden(True)
             self.fingerprintLineEdit.setHidden(True)
             self.passphraseLabel.setHidden(True)
