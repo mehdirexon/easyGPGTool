@@ -37,7 +37,7 @@ class newKeyForm(QWidget):
         #the key type of the key
         self.keyTypeLabel = QLabel("key type : ")
         self.keyTypeCombo = QComboBox()
-        self.keyTypeCombo.addItems(["RSA","DSA"])
+        self.keyTypeCombo.addItems(["RSA"])
 
         #create_button
         self.createButton = QPushButton("create")
