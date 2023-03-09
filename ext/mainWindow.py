@@ -1,9 +1,8 @@
-from PySide6.QtWidgets import QMainWindow,QStatusBar,QMessageBox,QFileDialog
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QIcon,QKeySequence
+from PySide6.QtWidgets import QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout
+from PySide6.QtCore import Slot,Qt
+from PySide6.QtGui import QIcon,QKeySequence,QFont,QClipboard
 from datetime import datetime
 from ext.new_key import newKeyForm
-from ext.show_all import showAllForm
 from ext.patch_note import patchNoteForm
 from ext.remove_key import removeKeyForm
 from ext.about_us import aboutUsForm
@@ -11,7 +10,9 @@ from ext.encrypt import encryptForm
 from ext.decrypt import decryptForm
 from ext.export import exportForm
 from ext._import import importForm
+from ext.trust import trustForm
 from ext.extensions import Ext
+from plyer import notification
 from colorama import Fore
 from glob import glob
 import gnupg,os,magic
@@ -20,7 +21,7 @@ gpg = gnupg.GPG(gnupghome='/home/'+os.getlogin()+'/.gnupg')
 gpg.encoding = 'utf-8'
 #-------------------------------------------------------------------------------------------------------#
 class mainWindow(QMainWindow):
-    __information__ = {"version" : "beta","author" : "Mehdi Ghazanfari","author_email" : "coming soon"}
+    __information__ = {"version" : "beta","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
     now = datetime.now()
 #-------------------------------------------------------------------------------------------------------#
     def __init__(self,app,title):
@@ -30,102 +31,25 @@ class mainWindow(QMainWindow):
         #forms
         self.newKeyForm = None
         self.removeKeyForm = None
-        self.showAllForm = None
         self.aboutUsForm = None
         self.patchNoteForm = None
         self.encryptForm = None
         self.decryptForm = None
         self.exportForm = None
         self.importForm = None
+        self.trustForm = None
         #basic configs
         self.setWindowTitle(title)
-        self.setMinimumHeight(400)
-        self.setMinimumWidth(700)
+        self.setMinimumHeight(600)
+        self.setMinimumWidth(1000)
         self.setWindowIcon(QIcon("ext/pictures/gpgIcon.ico"))
 
+        #menu_table
+        menuItems.__showMenuItems__(self)
         #menubar
-        menuBar = self.menuBar()
-
-        #action bar and its actions
-        actionMenu = menuBar.addMenu("Action")
-
-        ###actions
-        #1
-        newKey = actionMenu.addAction("New key")
-        newKey.setShortcut(QKeySequence(QKeySequence.New))
-        newKey.triggered.connect(self.newKey)
-        newKey.setIcon(QIcon("ext/pictures/newIcon.png"))
-        newKey.setStatusTip("creates a new key")
-        #2
-        removeKey = actionMenu.addAction("Remove key")
-        removeKey.triggered.connect(self.removeKey)
-        removeKey.setShortcut(QKeySequence(QKeySequence.Delete))
-        removeKey.setIcon(QIcon("ext/pictures/removeIcon.png"))
-        removeKey.setStatusTip("removes a key")
-
-        actionMenu.addSeparator()
-        #3
-        showAll = actionMenu.addAction('Show all the keys')
-        showAll.triggered.connect(self.showAll)
-        showAll.setShortcut(QKeySequence(QKeySequence.Paste))
-        showAll.setIcon(QIcon("ext/pictures/showAll.png"))
-        showAll.setStatusTip("shows all the keys has been crated so far")
-
-        actionMenu.addSeparator()
-
-        #4
-        encrypt = actionMenu.addAction('Encrypt')
-        encrypt.triggered.connect(self.encrypt)
-        encrypt.setStatusTip("encrypts a file")
-        encrypt.setIcon(QIcon("ext/pictures/encrypt.png"))
-        encrypt.setShortcut(QKeySequence('Shift+E'))
-        #5
-        decrypt = actionMenu.addAction('Decrypt')
-        decrypt.triggered.connect(self.decrypt)
-        decrypt.setStatusTip('decrypts a file')
-        decrypt.setIcon(QIcon('ext/pictures/decrypt.png'))
-        decrypt.setShortcut(QKeySequence('Shift+D'))
-
-        actionMenu.addSeparator()
-        #6
-        exportAction = actionMenu.addAction("Export")
-        exportAction.setStatusTip("exports a key")
-        exportAction.setIcon(QIcon("ext/pictures/export.png"))
-        exportAction.triggered.connect(self.export)
-
-        #7
-        importAction = actionMenu.addAction("Import")
-        importAction.setStatusTip("imports a key")
-        importAction.setIcon(QIcon("ext/pictures/import.png"))
-        importAction.triggered.connect(self.import_)
-
-        actionMenu.addSeparator()
-        #8
-        quitAction = actionMenu.addAction("Quit")
-        quitAction.setStatusTip("application will be closed")
-        quitAction.setIcon(QIcon("ext/pictures/quit.png"))
-        quitAction.setShortcut(QKeySequence(QKeySequence.Quit))
-        quitAction.triggered.connect(self.quit)
-
-        #help bar and its actions
-        helpMenu = menuBar.addMenu("Help")
-            #actions
-        #1
-        patchNote = helpMenu.addAction("Patch note")
-        patchNote.setStatusTip("show lastest changes in the app")
-        patchNote.triggered.connect(self.patchNote)
-        patchNote.setIcon(QIcon('ext/pictures/patchNote.png'))
-        #2
-        aboutUs = helpMenu.addAction("About us")
-        aboutUs.setStatusTip("shows app and author information")
-        aboutUs.setIcon(QIcon('ext/pictures/aboutUs.png'))
-        aboutUs.setShortcut(QKeySequence(QKeySequence.HelpContents))
-        aboutUs.triggered.connect(self.aboutUs)
-
+        topBarMenu.__showTopBarItems__(self)
         #status bar
         self.setStatusBar(QStatusBar(self))
-
-        self.sendLog("the app runned successfully",Fore.GREEN)
 #-------------------------------------------------------------------------------------------------------#
     def quit(self):
         try:
@@ -143,6 +67,7 @@ class mainWindow(QMainWindow):
             self.sendLog("recive and generate signal has been recived",Fore.GREEN)
             GPG.generate_key(self,data)
             QMessageBox.information(self,"successful task","fingerprint : " + GPG.key,QMessageBox.Ok)
+            menuItems.__Load__(self)
         except Exception as ex:
             self.sendLog(str(ex),Fore.RED)
             result = QMessageBox.critical(self,"error",str(ex),QMessageBox.Retry|QMessageBox.Abort)
@@ -150,13 +75,14 @@ class mainWindow(QMainWindow):
                 self.newKey()
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def reciveAndDelete(self,data):
+    def reciveAndDelete(self,state):
         try:
             self.sendLog("recive and delete signal has been recived",Fore.GREEN)
-            result = GPG.removeKey(self,data)
-            if result[0] == 0:
+            result = GPG.removeKey(self,state)
+            if result.status == 'ok':
                 self.sendLog("a key was deleted",Fore.GREEN)
-                QMessageBox.information(self,"successful task","key was deleted successfully",QMessageBox.Ok)
+                QMessageBox.information(self,"successful task","key has been deleted successfully",QMessageBox.Ok)
+                menuItems.__Load__(self)
         except Exception as ex:
             self.sendLog(str(ex),Fore.RED)
             result = QMessageBox.critical(self,"error",str(ex),QMessageBox.Retry|QMessageBox.Abort)
@@ -195,7 +121,7 @@ class mainWindow(QMainWindow):
                 result = QMessageBox.critical(self,"decrypting a file",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
                     self.decrypt()
-#-------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------d---------------------------------------------------#
     @Slot()
     def exportSignal(self,status,armor):
         try:
@@ -217,39 +143,41 @@ class mainWindow(QMainWindow):
             status = GPG.import_(self,status)
             if status[1] == False:
                 QMessageBox.information(self,"importing a public key",status[0] + '\n',QMessageBox.Ok)
-                
+                menuItems.__Load__(self)
             elif status[1] == True:
                 QMessageBox.information(self,"importing a private key",status[0] + '\n',QMessageBox.Ok)
+                menuItems.__Load__(self)
+            self.sendLog("an import task has been successfully done",Fore.GREEN)
         except Exception as ex:
             self.sendLog(str(ex),Fore.RED)
             result = QMessageBox.critical(self,"importing a key",str(ex),QMessageBox.Retry|QMessageBox.Abort)
             if result == QMessageBox.Retry:
-                self.import_() 
+                self.import_()
 #-------------------------------------------------------------------------------------------------------#
-    def showAll(self):
-        if self.showAllForm is None:
-            try:
-                self.showAllForm = showAllForm()
-                self.showAllForm.show()
-                GPG.showAll(self.showAllForm.textBox)
-                self.sendLog("show all form has been called",Fore.GREEN)
-            except Exception as ex:
-                self.sendLog(str(ex),Fore.RED)
-                result = QMessageBox.critical(self,"starting show all form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
-                if result == QMessageBox.Retry:
-                    self.showAll()
-        else:
-            try:
-                self.showAllForm.close()
-                self.showAllForm = showAllForm()
-                self.showAllForm.show()
-                GPG.showAll(self.showAllForm.textBox)
-                self.sendLog("previous show all form destroyed and again been called",Fore.GREEN)
-            except Exception as ex:
-                self.sendLog(str(ex),Fore.RED)
-                result = QMessageBox.critical(self,"starting show all form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
-                if result == QMessageBox.Retry:
-                    self.showAll()
+    @Slot()
+    def privateCBChanged(self):
+        menuItems.__Load__(self)
+#-------------------------------------------------------------------------------------------------------#
+    @Slot()
+    def trustLVLChanged(self,mode):
+        try:
+            result = GPG.changeTrust(self,mode)
+            QMessageBox.information(self,"changing a key trust value",result.status + '\n' + result.stderr,QMessageBox.Ok)
+            menuItems.__Load__(self)
+        except Exception as ex:
+            self.sendLog(str(ex),Fore.RED)
+            result = QMessageBox.critical(self,"changing a key trust value",str(ex),QMessageBox.Retry|QMessageBox.Abort)
+            if result == QMessageBox.Retry:
+                self.trust()
+#-------------------------------------------------------------------------------------------------------#
+    def tableCellClicked(self,row,column):
+        data = self.table.item(row,column)
+        clipboard = QClipboard()
+        clipboard.setText(str(data.text()))
+        notification.notify(
+            title = 'GPG tool notification',
+            message = data.text()+'\nhas been copied in clipboard',
+        )
 #-------------------------------------------------------------------------------------------------------#
     def removeKey(self):
         if self.removeKeyForm is None:
@@ -449,7 +377,242 @@ class mainWindow(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.import_()
 #-------------------------------------------------------------------------------------------------------#
+    def trust(self):
+        if self.trustForm is None:
+            try:
+                self.trustForm = trustForm()
+                self.trustForm.show()
+                self.trustForm.getFingerprints(gpg.list_keys())
+                self.trustForm.signal.connect(self.trustLVLChanged)
+                self.sendLog("trust form has been called",Fore.GREEN)
+            except Exception as ex:
+                self.sendLog(str(ex),Fore.RED)
+                result = QMessageBox.critical(self,"starting import form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
+                if result == QMessageBox.Retry:
+                    self.import_()
+        else:
+            try:
+                self.trustForm.close()
+                self.trustForm = trustForm()
+                self.trustForm.show()
+                self.trustForm.getFingerprints(gpg.list_keys())
+                self.trustForm.signal.connect(self.trustLVLChanged)
+                self.sendLog("previous trust form destoryed and again called",Fore.GREEN)
+            except Exception as ex:
+                self.sendLog(str(ex),Fore.RED)
+                result = QMessageBox.critical(self,"starting trust form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
+                if result == QMessageBox.Retry:
+                    self.import_()
+#-------------------------------------------------------------------------------------------------------#
+#classes
+class topBarMenu():
+    @staticmethod
+    def __showTopBarItems__(QMainWindow):
+        QMainWindow.menuBar = QMainWindow.menuBar()
+        topBarMenu.__keyMenu__(QMainWindow)
+        topBarMenu.__dataProtectionMenu__(QMainWindow)
+        topBarMenu.__keySharing__(QMainWindow)
+        topBarMenu.__helpMenu__(QMainWindow)
+    @staticmethod
+    def __keyMenu__(QMainWindow):
+        QMainWindow.keyMenu = QMainWindow.menuBar.addMenu("Key")
+        #1
+        newKey = QMainWindow.keyMenu.addAction("New key")
+        newKey.setShortcut(QKeySequence(QKeySequence.New))
+        newKey.triggered.connect(QMainWindow.newKey)
+        newKey.setIcon(QIcon("ext/pictures/newIcon.png"))
+        newKey.setStatusTip("creates a new key")
+        #2
+        trustKey = QMainWindow.keyMenu.addAction("Trust key")
+        trustKey.triggered.connect(QMainWindow.trust)
+        trustKey.setIcon(QIcon("ext/pictures/trust.png"))
+        trustKey.setStatusTip("changes trust lvl of a key")
+        #3
+        removeKey = QMainWindow.keyMenu.addAction("Remove key")
+        removeKey.triggered.connect(QMainWindow.removeKey)
+        removeKey.setShortcut(QKeySequence(QKeySequence.Delete))
+        removeKey.setIcon(QIcon("ext/pictures/removeIcon.png"))
+        removeKey.setStatusTip("removes a key")
+    @staticmethod
+    def __dataProtectionMenu__(QMainWindow):
+        QMainWindow.dataProtection = QMainWindow.menuBar.addMenu("Data protection")
+        encrypt = QMainWindow.dataProtection.addAction('Encrypt')
+        encrypt.triggered.connect(QMainWindow.encrypt)
+        encrypt.setStatusTip("encrypts a file")
+        encrypt.setIcon(QIcon("ext/pictures/encrypt.png"))
+        encrypt.setShortcut(QKeySequence('Shift+E'))
+        #5
+        decrypt = QMainWindow.dataProtection.addAction('Decrypt')
+        decrypt.triggered.connect(QMainWindow.decrypt)
+        decrypt.setStatusTip('decrypts a file')
+        decrypt.setIcon(QIcon('ext/pictures/decrypt.png'))
+        decrypt.setShortcut(QKeySequence('Shift+D'))
+    @staticmethod
+    def __helpMenu__(QMainWindow):
+        QMainWindow.helpMenu = QMainWindow.menuBar.addMenu("Help")
+            #actions
+        #1
+        patchNote = QMainWindow.helpMenu.addAction("What's new")
+        patchNote.setStatusTip("show lastest changes in the app")
+        patchNote.triggered.connect(QMainWindow.patchNote)
+        patchNote.setIcon(QIcon('ext/pictures/patchNote.png'))
+        #2
+        aboutUs = QMainWindow.helpMenu.addAction("About us")
+        aboutUs.setStatusTip("shows app and author information")
+        aboutUs.setIcon(QIcon('ext/pictures/aboutUs.png'))
+        aboutUs.setShortcut(QKeySequence(QKeySequence.HelpContents))
+        aboutUs.triggered.connect(QMainWindow.aboutUs)
+    @staticmethod
+    def __keySharing__(QMainWindow):
+        QMainWindow.keySharingMenu = QMainWindow.menuBar.addMenu("Key sharing")
 
+        exportAction = QMainWindow.keySharingMenu.addAction("Export")
+        exportAction.setStatusTip("exports a key")
+        exportAction.setIcon(QIcon("ext/pictures/export.png"))
+        exportAction.triggered.connect(QMainWindow.export)
+
+        #7
+        importAction = QMainWindow.keySharingMenu.addAction("Import")
+        importAction.setStatusTip("imports a key")
+        importAction.setIcon(QIcon("ext/pictures/import.png"))
+        importAction.triggered.connect(QMainWindow.import_)
+class menuItems():
+    @staticmethod
+    def __showMenuItems__(QMainWindow):
+        menuItems.__configs__(QMainWindow)
+        menuItems.__setStyles__(QMainWindow)
+    @staticmethod  
+    def __configs__(QMainWindow):
+        QMainWindow.verLayout = QVBoxLayout()
+
+        QMainWindow.privateCB = QCheckBox("private key")
+        QMainWindow.table = QTableWidget(QMainWindow)
+        QMainWindow.widget = QWidget()
+
+        QMainWindow.privateCB.setStatusTip("shows private keys")
+        QMainWindow.table.setStatusTip("list of keys")
+
+        QMainWindow.table.cellClicked.connect(QMainWindow.tableCellClicked)
+        QMainWindow.privateCB.stateChanged.connect(QMainWindow.privateCBChanged)
+
+        QMainWindow.verLayout.addWidget(QMainWindow.table)
+        QMainWindow.verLayout.addWidget(QMainWindow.privateCB,alignment=Qt.AlignRight)
+
+        QMainWindow.widget.setLayout(QMainWindow.verLayout)
+        QMainWindow.setCentralWidget(QMainWindow.widget)
+        #QMainWindow.table.setSelectionMode(QAbstractItemView.NoSelection)
+        QMainWindow.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        QMainWindow.table.setFocusPolicy(Qt.NoFocus)
+        QMainWindow.table.setAlternatingRowColors(True)
+
+        QMainWindow.table.setColumnCount(5)
+        QMainWindow.table.setRowCount(len(gpg.list_keys()))
+
+        QMainWindow.table.verticalHeader().setVisible(False)
+        QMainWindow.table.setFont(QFont("sans-serif",8))
+        QMainWindow.table.setHorizontalHeaderLabels(["Type","Name","Email","Fingerprint","trust"])
+
+        QMainWindow.table.horizontalHeader().setSectionResizeMode(4,QHeaderView.Fixed) 
+        QMainWindow.table.horizontalHeader().setSectionResizeMode(3,QHeaderView.Stretch) 
+        QMainWindow.table.horizontalHeader().setSectionResizeMode(2,QHeaderView.Stretch)
+        QMainWindow.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.Fixed)
+        QMainWindow.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Fixed)
+
+        for row,key in enumerate(gpg.list_keys()):
+            type = QTableWidgetItem(str(key['type']))
+            ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
+            email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
+            fp = QTableWidgetItem(str(key['fingerprint']))                
+            trustLvl = QTableWidgetItem(str(key['trust'])) 
+
+            type.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+            ID.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+            email.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+            fp.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+            trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter) 
+            QMainWindow.table.setRowCount(len(gpg.list_keys()))
+
+            QMainWindow.table.setItem(row,0,type)
+            QMainWindow.table.setItem(row,1,ID)
+            QMainWindow.table.setItem(row,2,email)
+            QMainWindow.table.setItem(row,3,fp)
+            QMainWindow.table.setItem(row,4,trustLvl)
+    @staticmethod
+    def __setStyles__(QMainWindow):
+        QMainWindow.table.setStyleSheet("""
+        QTableWidget
+        {
+            color : black;
+            font-family :sans-serif;
+            font-size : 12px; 
+            vertical-align: center;
+        }
+        QTableWidget
+        {
+            margin-top: 35px;
+            border-collapse: collapse;
+            border-radius:6px 6px 6px 6px;
+            min-width: 400px;
+            margin-left : 10px;
+            margin-right : 10px;
+            margin-bottom : 25px;
+            alternate-background-color: #f2f2f2;
+            background-color : #c5c7c9;
+        }
+        QHeaderView::section {
+            background-color: #04AA6D;
+            border-bottom: thin solid #009879;
+            font-family : sans-serif;    
+            border: none;
+            height: 22px;
+        }
+        """)
+    @staticmethod
+    def __Load__(QMainWindow):
+        QMainWindow.table.clear()
+        QMainWindow.table.setHorizontalHeaderLabels(["Type","Name","Email","Fingerprint","trust"])
+        if not QMainWindow.privateCB.isChecked():
+            for row,key in enumerate(gpg.list_keys()):
+                type = QTableWidgetItem(str(key['type']))
+                ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
+                email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
+                fp = QTableWidgetItem(str(key['fingerprint']))                
+                trustLvl = QTableWidgetItem(str(key['trust'])) 
+
+                type.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                ID.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                email.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                fp.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+
+                QMainWindow.table.setRowCount(len(gpg.list_keys()))
+
+                QMainWindow.table.setItem(row,0,type)
+                QMainWindow.table.setItem(row,1,ID)
+                QMainWindow.table.setItem(row,2,email)
+                QMainWindow.table.setItem(row,3,fp)
+                QMainWindow.table.setItem(row,4,trustLvl)
+        else:
+            for row,key in enumerate(gpg.list_keys(True)):
+                type = QTableWidgetItem(str(key['type']))
+                ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
+                email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
+                fp = QTableWidgetItem(str(key['fingerprint']))                
+                trustLvl = QTableWidgetItem(str(key['trust'])) 
+
+                type.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                ID.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                email.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                fp.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+
+                QMainWindow.table.setRowCount(len(gpg.list_keys(True)))
+
+                QMainWindow.table.setItem(row,0,type)
+                QMainWindow.table.setItem(row,1,ID)
+                QMainWindow.table.setItem(row,2,email)
+                QMainWindow.table.setItem(row,3,fp)
+                QMainWindow.table.setItem(row,4,trustLvl)
 class GPG(mainWindow):
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
@@ -469,31 +632,24 @@ class GPG(mainWindow):
             self.sendLog("a key created with this fingerprint : " + GPG.key ,Fore.GREEN)
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
-    def removeKey(self,data):
-        result = gpg.delete_keys(fingerprints=data['fingerprint'],passphrase=data['passphrase'],secret=True)
-        if result.status == 'ok':
-            result = gpg.delete_keys(fingerprints=data['fingerprint'],passphrase=data['passphrase'])
+    def removeKey(self,state):
+        if state:
+            result = gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text(),self.removeKeyForm.passphraseLineEdit.text())
             if result.status == 'ok':
                 GPG.key = ''
-                return [0,result]
+                return result
             else:
                 self.sendLog(result.stderr,Fore.RED)
                 raise Exception(result.stderr)
         else:
-            self.sendLog(result.stderr,Fore.RED)
-            raise Exception(result.stderr)
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def showAll(self):
-        if gpg.list_keys(False) != []:
-            self.append("public keys :\n")
-            for this in gpg.list_keys(False):
-                self.append(str(this) + '\n')
-            self.append('\nprivate keys :\n')
-            for this in gpg.list_keys(True):
-                self.append(str(this) + '\n')
-        else:
-            self.append("empty\n")
+            result = gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text())
+            if result.status == 'ok':
+                GPG.key = ''
+                return result
+            else:
+                self.sendLog(result.stderr,Fore.RED)
+                raise Exception(result.stderr)
+        
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
     def encrypt(self,email):
@@ -502,8 +658,10 @@ class GPG(mainWindow):
             raise Exception("No such key")
         #-----------------------------------------------------------
         for this in gpg.list_keys(True):
-            if this['uids'][0].replace('<','').replace('>','').split()[1] == email:
+            a = this['uids'][0].split('<')[1].replace('>','')
+            if this['uids'][0].split('<')[1].replace('>','') == email:
                 permission = True
+                break
         #-----------------------------------------------------------      
         if permission is not True:
             raise Exception("No such key")
@@ -596,4 +754,9 @@ class GPG(mainWindow):
                 return (result.stderr,True)
             else:
                 raise Exception(result.stderr)
-#-------------------------------------------------------------------------------------------------------#
+    @staticmethod
+    def changeTrust(self,mode):
+        result = gpg.trust_keys(self.trustForm.fingerprintCB.currentText(),mode)
+        if result.status != 'ok':
+            raise Exception(result.stderr)
+        return result
