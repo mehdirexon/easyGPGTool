@@ -6,9 +6,9 @@ class aboutUsForm(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("about us")
-        self.setFixedHeight(120)
-        self.setFixedWidth(200)
         #it locks parent form when child is active
+        self.setFixedHeight(120)
+        self.setFixedWidth(250)
         self.setWindowModality(Qt.ApplicationModal)
 #-------------------------------------------------------------------------------------------------------#
         #version_label
