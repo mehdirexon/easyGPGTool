@@ -99,7 +99,7 @@ slackpkg update && slackpkg upgrade-all
 slackpkg install python 
 python -m ensurepip 
 pip install --upgrade pip setuptools wheel 
-pip install -r .
+pip install .
 ```
 ## Acknowledgements🙏
 This README.md file was improved with the assistance of Bing. 😊
