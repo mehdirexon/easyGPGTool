@@ -634,7 +634,7 @@ class GPG(mainWindow):
     @staticmethod
     def removeKey(self,state):
         if state:
-            result = gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text(),self.removeKeyForm.passphraseLineEdit.text())
+            result = gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text(),passphrase= self.removeKeyForm.passphraseLineEdit.text(),secret=True)
             if result.status == 'ok':
                 GPG.key = ''
                 return result
