@@ -1,1 +1,6 @@
-[+] encrypt,decrypt,export,import,new key,delete key,patch note,show keys,sign checkbox during encrypting,about us were added
+[+]encrption and decryption were added
+[+]export and import were added
+[+]new key,delete key,trust key were added
+[+]what's new and about us were added
+[+]sign(digital signature) checkbox during encrypting was added
+[+]table of keys in main menu was added
