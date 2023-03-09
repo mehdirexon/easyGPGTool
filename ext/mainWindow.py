@@ -649,7 +649,6 @@ class GPG(mainWindow):
             else:
                 self.sendLog(result.stderr,Fore.RED)
                 raise Exception(result.stderr)
-        
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
     def encrypt(self,email):
