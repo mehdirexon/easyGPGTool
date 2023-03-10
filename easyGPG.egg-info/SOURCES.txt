@@ -1,4 +1,5 @@
 LICENSE
+MANIFEST.in
 README.md
 setup.py
 easyGPG/__init__.py
@@ -18,3 +19,17 @@ easyGPG.egg-info/SOURCES.txt
 easyGPG.egg-info/dependency_links.txt
 easyGPG.egg-info/requires.txt
 easyGPG.egg-info/top_level.txt
+easyGPG/patch_notes/0.1_patch_note.log
+easyGPG/patch_notes/beta_patch_note.log
+easyGPG/pictures/aboutUs.png
+easyGPG/pictures/decrypt.png
+easyGPG/pictures/encrypt.png
+easyGPG/pictures/export.png
+easyGPG/pictures/gpgIcon.ico
+easyGPG/pictures/import.png
+easyGPG/pictures/informationIcon.ico
+easyGPG/pictures/newIcon.png
+easyGPG/pictures/patchNote.png
+easyGPG/pictures/quit.png
+easyGPG/pictures/removeIcon.png
+easyGPG/pictures/trust.png
