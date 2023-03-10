@@ -1,0 +1,6 @@
+plyer
+colorama
+python-gnupg
+python-magic
+python-dateutil
+PySide6
