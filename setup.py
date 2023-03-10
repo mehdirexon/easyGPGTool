@@ -3,8 +3,8 @@ with open('README.md','r')as f:
     long_description = f.read()
 setup(
     name='easyGPG',
-    packages= find_packages(),
-    version='0.2',
+    version='0.2.2',
+    include_package_data=True,
     description='A GUI GPG tool application',
     long_description = long_description,
     author='Mehdi Ghazanfari',
