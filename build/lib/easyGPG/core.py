@@ -15,10 +15,11 @@ from easyGPG._extensions_ import Ext
 from plyer import notification
 from colorama import Fore
 from glob import glob
-import gnupg,os,magic,sys
+import gnupg,os,magic,sys,easyGPG
 #-------------------------------------------------------------------------------------------------------#
 gpg = gnupg.GPG(gnupghome='/home/'+os.getlogin()+'/.gnupg')
 gpg.encoding = 'utf-8'
+appPath = os.path.normpath(easyGPG.__file__ + os.sep + os.pardir)
 #-------------------------------------------------------------------------------------------------------#
 class app(QMainWindow):
     __information__ = {"version" : "beta","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
@@ -43,7 +44,7 @@ class app(QMainWindow):
         self.setWindowTitle("GPG Tool")
         self.setMinimumHeight(600)
         self.setMinimumWidth(1000)
-        self.setWindowIcon(QIcon("easyGPG/pictures/gpgIcon.ico"))
+        self.setWindowIcon(QIcon(appPath+"/pictures/gpgIcon.ico"))
 
         #menu_table
         menuItems.__showMenuItems__(self)
@@ -51,11 +52,6 @@ class app(QMainWindow):
         topBarMenu.__showTopBarItems__(self)
         #status bar
         self.setStatusBar(QStatusBar(self))
-#-------------------------------------------------------------------------------------------------------#
-    def run(self):
-        self.show()
-        self.app.exec()
-        del self.app
 #-------------------------------------------------------------------------------------------------------#
     def sendLog(self,txt_or_exception,status):
         print(f"{status}[LOG]",self.now.strftime("%H:%M:%S :"),txt_or_exception,f" {Fore.RESET}")
@@ -419,18 +415,18 @@ class topBarMenu():
         newKey = QMainWindow.keyMenu.addAction("New key")
         newKey.setShortcut(QKeySequence(QKeySequence.New))
         newKey.triggered.connect(QMainWindow.newKey)
-        newKey.setIcon(QIcon("easyGPG/pictures/newIcon.png"))
+        newKey.setIcon(QIcon(appPath+"/pictures/newIcon.png"))
         newKey.setStatusTip("creates a new key")
         #2
         trustKey = QMainWindow.keyMenu.addAction("Trust key")
         trustKey.triggered.connect(QMainWindow.trust)
-        trustKey.setIcon(QIcon("easyGPG/pictures/trust.png"))
+        trustKey.setIcon(QIcon(appPath+"/pictures/trust.png"))
         trustKey.setStatusTip("changes trust lvl of a key")
         #3
         removeKey = QMainWindow.keyMenu.addAction("Remove key")
         removeKey.triggered.connect(QMainWindow.removeKey)
         removeKey.setShortcut(QKeySequence(QKeySequence.Delete))
-        removeKey.setIcon(QIcon("easyGPG/pictures/removeIcon.png"))
+        removeKey.setIcon(QIcon(appPath+"/pictures/removeIcon.png"))
         removeKey.setStatusTip("removes a key")
     @staticmethod
     def __dataProtectionMenu__(QMainWindow):
@@ -438,13 +434,13 @@ class topBarMenu():
         encrypt = QMainWindow.dataProtection.addAction('Encrypt')
         encrypt.triggered.connect(QMainWindow.encrypt)
         encrypt.setStatusTip("encrypts a file")
-        encrypt.setIcon(QIcon("easyGPG/pictures/encrypt.png"))
+        encrypt.setIcon(QIcon(appPath + "/pictures/encrypt.png"))
         encrypt.setShortcut(QKeySequence('Shift+E'))
         #5
         decrypt = QMainWindow.dataProtection.addAction('Decrypt')
         decrypt.triggered.connect(QMainWindow.decrypt)
         decrypt.setStatusTip('decrypts a file')
-        decrypt.setIcon(QIcon('easyGPG/pictures/decrypt.png'))
+        decrypt.setIcon(QIcon(appPath+'/pictures/decrypt.png'))
         decrypt.setShortcut(QKeySequence('Shift+D'))
     @staticmethod
     def __helpMenu__(QMainWindow):
@@ -454,11 +450,11 @@ class topBarMenu():
         patchNote = QMainWindow.helpMenu.addAction("What's new")
         patchNote.setStatusTip("show lastest changes in the app")
         patchNote.triggered.connect(QMainWindow.patchNote)
-        patchNote.setIcon(QIcon('easyGPG/pictures/patchNote.png'))
+        patchNote.setIcon(QIcon(appPath+'/pictures/patchNote.png'))
         #2
         aboutUs = QMainWindow.helpMenu.addAction("About us")
         aboutUs.setStatusTip("shows app and author information")
-        aboutUs.setIcon(QIcon('easyGPG/pictures/aboutUs.png'))
+        aboutUs.setIcon(QIcon(appPath+'/pictures/aboutUs.png'))
         aboutUs.setShortcut(QKeySequence(QKeySequence.HelpContents))
         aboutUs.triggered.connect(QMainWindow.aboutUs)
     @staticmethod
@@ -467,13 +463,13 @@ class topBarMenu():
 
         exportAction = QMainWindow.keySharingMenu.addAction("Export")
         exportAction.setStatusTip("exports a key")
-        exportAction.setIcon(QIcon("easyGPG/pictures/export.png"))
+        exportAction.setIcon(QIcon(appPath+"/pictures/export.png"))
         exportAction.triggered.connect(QMainWindow.export)
 
         #7
         importAction = QMainWindow.keySharingMenu.addAction("Import")
         importAction.setStatusTip("imports a key")
-        importAction.setIcon(QIcon("easyGPG/pictures/import.png"))
+        importAction.setIcon(QIcon(appPath+"/pictures/import.png"))
         importAction.triggered.connect(QMainWindow.import_)
 class menuItems():
     @staticmethod
@@ -758,3 +754,8 @@ class GPG(app):
         if result.status != 'ok':
             raise Exception(result.stderr)
         return result
+def run():
+    easyGPG = app()
+    easyGPG.show()
+    easyGPG.app.exec()
+    del easyGPG.app
