@@ -1,33 +1,33 @@
-from PySide6.QtWidgets import QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout
+from PySide6.QtWidgets import QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication
 from PySide6.QtCore import Slot,Qt
 from PySide6.QtGui import QIcon,QKeySequence,QFont,QClipboard
 from datetime import datetime
-from ext.new_key import newKeyForm
-from ext.patch_note import patchNoteForm
-from ext.remove_key import removeKeyForm
-from ext.about_us import aboutUsForm
-from ext.encrypt import encryptForm
-from ext.decrypt import decryptForm
-from ext.export import exportForm
-from ext._import import importForm
-from ext.trust import trustForm
-from ext.extensions import Ext
+from easyGPG._newkey_ import newKeyForm
+from easyGPG._patchNote_ import patchNoteForm
+from easyGPG._removeKey_ import removeKeyForm
+from easyGPG._aboutUs_ import aboutUsForm
+from easyGPG._encrypt_ import encryptForm
+from easyGPG._decrypt_ import decryptForm
+from easyGPG._export_ import exportForm
+from easyGPG._import_ import importForm
+from easyGPG._trust_ import trustForm
+from easyGPG._extensions_ import Ext
 from plyer import notification
 from colorama import Fore
 from glob import glob
-import gnupg,os,magic
+import gnupg,os,magic,sys
 #-------------------------------------------------------------------------------------------------------#
 gpg = gnupg.GPG(gnupghome='/home/'+os.getlogin()+'/.gnupg')
 gpg.encoding = 'utf-8'
 #-------------------------------------------------------------------------------------------------------#
-class mainWindow(QMainWindow):
+class app(QMainWindow):
     __information__ = {"version" : "beta","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
     now = datetime.now()
 #-------------------------------------------------------------------------------------------------------#
-    def __init__(self,app,title):
+    def __init__(self):
         #basics
+        self.app = QApplication(sys.argv)
         super().__init__()
-        self.app = app
         #forms
         self.newKeyForm = None
         self.removeKeyForm = None
@@ -38,11 +38,12 @@ class mainWindow(QMainWindow):
         self.exportForm = None
         self.importForm = None
         self.trustForm = None
+        
         #basic configs
-        self.setWindowTitle(title)
+        self.setWindowTitle("GPG Tool")
         self.setMinimumHeight(600)
         self.setMinimumWidth(1000)
-        self.setWindowIcon(QIcon("ext/pictures/gpgIcon.ico"))
+        self.setWindowIcon(QIcon("easyGPG/pictures/gpgIcon.ico"))
 
         #menu_table
         menuItems.__showMenuItems__(self)
@@ -51,12 +52,10 @@ class mainWindow(QMainWindow):
         #status bar
         self.setStatusBar(QStatusBar(self))
 #-------------------------------------------------------------------------------------------------------#
-    def quit(self):
-        try:
-            self.app.quit()
-            self.sendLog("the application was closed by quit action",Fore.GREEN)
-        except Exception as ex:
-            self.sendLog(ex,Fore.RED)
+    def run(self):
+        self.show()
+        self.app.exec()
+        del self.app
 #-------------------------------------------------------------------------------------------------------#
     def sendLog(self,txt_or_exception,status):
         print(f"{status}[LOG]",self.now.strftime("%H:%M:%S :"),txt_or_exception,f" {Fore.RESET}")
@@ -121,7 +120,7 @@ class mainWindow(QMainWindow):
                 result = QMessageBox.critical(self,"decrypting a file",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
                     self.decrypt()
-#----------------------------------------------------d---------------------------------------------------#
+#-------------------------------------------------------------------------------------------------------#
     @Slot()
     def exportSignal(self,status,armor):
         try:
@@ -420,18 +419,18 @@ class topBarMenu():
         newKey = QMainWindow.keyMenu.addAction("New key")
         newKey.setShortcut(QKeySequence(QKeySequence.New))
         newKey.triggered.connect(QMainWindow.newKey)
-        newKey.setIcon(QIcon("ext/pictures/newIcon.png"))
+        newKey.setIcon(QIcon("easyGPG/pictures/newIcon.png"))
         newKey.setStatusTip("creates a new key")
         #2
         trustKey = QMainWindow.keyMenu.addAction("Trust key")
         trustKey.triggered.connect(QMainWindow.trust)
-        trustKey.setIcon(QIcon("ext/pictures/trust.png"))
+        trustKey.setIcon(QIcon("easyGPG/pictures/trust.png"))
         trustKey.setStatusTip("changes trust lvl of a key")
         #3
         removeKey = QMainWindow.keyMenu.addAction("Remove key")
         removeKey.triggered.connect(QMainWindow.removeKey)
         removeKey.setShortcut(QKeySequence(QKeySequence.Delete))
-        removeKey.setIcon(QIcon("ext/pictures/removeIcon.png"))
+        removeKey.setIcon(QIcon("easyGPG/pictures/removeIcon.png"))
         removeKey.setStatusTip("removes a key")
     @staticmethod
     def __dataProtectionMenu__(QMainWindow):
@@ -439,13 +438,13 @@ class topBarMenu():
         encrypt = QMainWindow.dataProtection.addAction('Encrypt')
         encrypt.triggered.connect(QMainWindow.encrypt)
         encrypt.setStatusTip("encrypts a file")
-        encrypt.setIcon(QIcon("ext/pictures/encrypt.png"))
+        encrypt.setIcon(QIcon("easyGPG/pictures/encrypt.png"))
         encrypt.setShortcut(QKeySequence('Shift+E'))
         #5
         decrypt = QMainWindow.dataProtection.addAction('Decrypt')
         decrypt.triggered.connect(QMainWindow.decrypt)
         decrypt.setStatusTip('decrypts a file')
-        decrypt.setIcon(QIcon('ext/pictures/decrypt.png'))
+        decrypt.setIcon(QIcon('easyGPG/pictures/decrypt.png'))
         decrypt.setShortcut(QKeySequence('Shift+D'))
     @staticmethod
     def __helpMenu__(QMainWindow):
@@ -455,11 +454,11 @@ class topBarMenu():
         patchNote = QMainWindow.helpMenu.addAction("What's new")
         patchNote.setStatusTip("show lastest changes in the app")
         patchNote.triggered.connect(QMainWindow.patchNote)
-        patchNote.setIcon(QIcon('ext/pictures/patchNote.png'))
+        patchNote.setIcon(QIcon('easyGPG/pictures/patchNote.png'))
         #2
         aboutUs = QMainWindow.helpMenu.addAction("About us")
         aboutUs.setStatusTip("shows app and author information")
-        aboutUs.setIcon(QIcon('ext/pictures/aboutUs.png'))
+        aboutUs.setIcon(QIcon('easyGPG/pictures/aboutUs.png'))
         aboutUs.setShortcut(QKeySequence(QKeySequence.HelpContents))
         aboutUs.triggered.connect(QMainWindow.aboutUs)
     @staticmethod
@@ -468,13 +467,13 @@ class topBarMenu():
 
         exportAction = QMainWindow.keySharingMenu.addAction("Export")
         exportAction.setStatusTip("exports a key")
-        exportAction.setIcon(QIcon("ext/pictures/export.png"))
+        exportAction.setIcon(QIcon("easyGPG/pictures/export.png"))
         exportAction.triggered.connect(QMainWindow.export)
 
         #7
         importAction = QMainWindow.keySharingMenu.addAction("Import")
         importAction.setStatusTip("imports a key")
-        importAction.setIcon(QIcon("ext/pictures/import.png"))
+        importAction.setIcon(QIcon("easyGPG/pictures/import.png"))
         importAction.triggered.connect(QMainWindow.import_)
 class menuItems():
     @staticmethod
@@ -613,7 +612,7 @@ class menuItems():
                 QMainWindow.table.setItem(row,2,email)
                 QMainWindow.table.setItem(row,3,fp)
                 QMainWindow.table.setItem(row,4,trustLvl)
-class GPG(mainWindow):
+class GPG(app):
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
     def generate_key(self,data):
