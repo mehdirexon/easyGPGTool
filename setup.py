@@ -4,6 +4,7 @@ with open('README.md','r')as f:
 setup(
     name='easyGPG',
     version='0.2.2',
+    packages=['easyGPG'],
     include_package_data=True,
     description='A GUI GPG tool application',
     long_description = long_description,

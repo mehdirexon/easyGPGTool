@@ -47,8 +47,6 @@ easyGPG makes it easy for anyone to use GPG for encryption and decryption withou
 
 ## Recently changes🆕
 
-+ digital signature was added
-
 + some bugs were fixed
 
 ## Requirements📦
@@ -62,38 +60,38 @@ After installing the required packages, make sure to compile the project in orde
 ```
 sudo apt update && sudo apt upgrade 
 sudo apt install python3 && sudo apt install python3-pip 
-pip3 install .
+pip3 install easyGPG
 ```
 ### For Fedora
 ```
 sudo dnf update && sudo dnf upgrade 
 sudo dnf install python3 && sudo dnf install python3-pip 
-pip3 install .
+pip3 install easyGPG
 ```
 ### For Arch
 ```
 sudo pacman -Syu
 sudo pacman -S python python-pip
-pip3 install .
+pip3 install easyGPG
 ```
 ### For MacOS
 ```
 xcode-select --install
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew install python3
-pip3 install .
+pip3 install easyGPG
 ```
 ### CentOS/RHEL
 ```
 sudo yum update
 sudo yum install python3 python3-pip
-pip3 install .
+pip3 install easyGPG
 ```
 ### Gentoo
 ```
 sudo emerge --sync && sudo emerge --update world 
 sudo emerge --ask dev-lang/python dev-python/pip 
-pip3 install .
+pip3 install easyGPG
 ```
 ### Slackware
 ```
@@ -101,7 +99,7 @@ slackpkg update && slackpkg upgrade-all
 slackpkg install python 
 python -m ensurepip 
 pip install --upgrade pip setuptools wheel 
-pip install .
+pip install easyGPG
 ```
 ## Acknowledgements🙏
 This README.md file was improved with the assistance of Bing. 😊

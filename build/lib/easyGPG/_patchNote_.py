@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget,QPushButton,QVBoxLayout,QTextEdit,QComboBox
 from PySide6.QtCore import Qt
+import os,easyGPG
 #-------------------------------------------------------------------------------------------------------#
 class patchNoteForm(QWidget):
 #-------------------------------------------------------------------------------------------------------#
@@ -38,14 +39,15 @@ class patchNoteForm(QWidget):
 #-------------------------------------------------------------------------------------------------------#
     def autoLoad(self):
         ver = self.verComboBox.currentText()
+        appPath = os.path.normpath(easyGPG.__file__ + os.sep + os.pardir)
         if ver == "beta" :
             self.textBox.clear()
-            with open("ext/patch notes/beta_patch_note.log","r") as file:
+            with open(appPath+"/patch_notes/beta_patch_note.log","r") as file:
                 betaPatchNote = file.read()
                 self.textBox.append(betaPatchNote)
         elif ver == "0.1":
             self.textBox.clear()
-            with open("ext/patch notes/0.1_patch_note.log","r") as file:
+            with open(appPath+"/patch_notes/0.1_patch_note.log","r") as file:
                 betaPatchNote = file.read()
                 self.textBox.append(betaPatchNote)
         else:
