@@ -6,6 +6,7 @@ setup(
     version='0.2.2',
     packages=['easyGPG'],
     include_package_data=True,
+    long_description_content_type = 'text/x-rst',
     description='A GUI GPG tool application',
     long_description = long_description,
     author='Mehdi Ghazanfari',
