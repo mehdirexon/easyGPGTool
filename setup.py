@@ -2,16 +2,16 @@ from setuptools import setup,find_packages
 with open('README.md','r')as f:
     long_description = f.read()
 setup(
-    name='easyGPG',
-    version='0.2.2',
-    packages=['easyGPG'],
+    name='easyGPGTool',
+    version='0.1',
+    packages=['easyGPGTool'],
     include_package_data=True,
     long_description_content_type = 'text/x-rst',
     description='A GUI GPG tool application',
     long_description = long_description,
     author='Mehdi Ghazanfari',
     author_email='mehdirexon@gmail.com',
-    url = 'https://github.com/MehdiREXON/easyGPG',
+    url = 'https://github.com/MehdiREXON/easyGPGTool',
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",

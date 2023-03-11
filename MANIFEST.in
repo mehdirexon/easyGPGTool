@@ -1,4 +1,4 @@
 recursive-include data *
-include easyGPG/pictures/*.png
-include easyGPG/pictures/*.ico
-include easyGPG/patch_notes/*.log
+include easyGPGTool/pictures/*.png
+include easyGPGTool/pictures/*.ico
+include easyGPGTool/patch_notes/*.log
