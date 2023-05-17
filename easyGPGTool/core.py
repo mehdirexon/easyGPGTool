@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication
 from PySide6.QtCore import Slot,Qt
-from PySide6.QtGui import QIcon,QKeySequence,QFont,QClipboard
+from PySide6.QtGui import QIcon,QKeySequence,QFont,QClipboard,QScreen
 from datetime import datetime
 from easyGPGTool._newkey_ import newKeyForm
 from easyGPGTool._patchNote_ import patchNoteForm
@@ -52,6 +52,13 @@ class app(QMainWindow):
         topBarMenu.__showTopBarItems__(self)
         #status bar
         self.setStatusBar(QStatusBar(self))
+#-------------------------------------------------------------------------------------------------------#
+    def showEvent(self, event):
+        super().showEvent(event)
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 #-------------------------------------------------------------------------------------------------------#
     def sendLog(self,txt_or_exception,status):
         print(f"{status}[LOG]",self.now.strftime("%H:%M:%S :"),txt_or_exception,f" {Fore.RESET}")
@@ -755,6 +762,12 @@ class GPG(app):
             raise Exception(result.stderr)
         return result
 def run():
+    easyGPGTool = app()
+    easyGPGTool.show()
+    easyGPGTool.app.exec()
+    del easyGPGTool.app
+
+if __name__ == "__main__":
     easyGPGTool = app()
     easyGPGTool.show()
     easyGPGTool.app.exec()
