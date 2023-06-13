@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication
-from PySide6.QtCore import Slot,Qt
-from PySide6.QtGui import QIcon,QKeySequence,QFont,QClipboard,QScreen
+from PySide6.QtWidgets import (QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication)
+from PySide6.QtCore import (Slot,Qt)
+from PySide6.QtGui import (QIcon,QKeySequence,QFont,QClipboard,QScreen)
 from datetime import datetime
 from easyGPGTool._newkey_ import newKeyForm
 from easyGPGTool._patchNote_ import patchNoteForm
@@ -12,17 +12,20 @@ from easyGPGTool._export_ import exportForm
 from easyGPGTool._import_ import importForm
 from easyGPGTool._trust_ import trustForm
 from easyGPGTool._extensions_ import Ext
+from easyGPGTool._passGen_ import passGenForm
 from plyer import notification
+from passlib.hash import pbkdf2_sha256
+from passlib import pwd
 from colorama import Fore
 from glob import glob
-import gnupg,os,magic,sys,easyGPGTool
+import gnupg,os,magic,sys,logging
 #-------------------------------------------------------------------------------------------------------#
 gpg = gnupg.GPG(gnupghome='/home/'+os.getlogin()+'/.gnupg')
 gpg.encoding = 'utf-8'
-appPath = os.path.normpath(easyGPGTool.__file__ + os.sep + os.pardir)
+appPath = os.path.normpath(__file__ + os.sep + os.pardir)
 #-------------------------------------------------------------------------------------------------------#
 class app(QMainWindow):
-    __information__ = {"version" : "beta","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
+    __information__ = {"version" : "0.2","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
     now = datetime.now()
 #-------------------------------------------------------------------------------------------------------#
     def __init__(self):
@@ -39,12 +42,14 @@ class app(QMainWindow):
         self.exportForm = None
         self.importForm = None
         self.trustForm = None
-        
+        self.passGenForm = None
+
+
         #basic configs
-        self.setWindowTitle("GPG Tool")
+        self.setWindowTitle("easyGPG tool")
         self.setMinimumHeight(600)
         self.setMinimumWidth(1000)
-        self.setWindowIcon(QIcon(appPath+"/pictures/gpgIcon.ico"))
+        self.setWindowIcon(QIcon(appPath+"/pictures/logo.png"))
 
         #menu_table
         menuItems.__showMenuItems__(self)
@@ -64,7 +69,7 @@ class app(QMainWindow):
         print(f"{status}[LOG]",self.now.strftime("%H:%M:%S :"),txt_or_exception,f" {Fore.RESET}")
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def reciveAndGenerate(self,data):
+    def keyGenSlot(self,data):
         try:
             self.sendLog("recive and generate signal has been recived",Fore.GREEN)
             GPG.generate_key(self,data)
@@ -77,7 +82,7 @@ class app(QMainWindow):
                 self.newKey()
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def reciveAndDelete(self,state):
+    def keyDelSlot(self,state):
         try:
             self.sendLog("recive and delete signal has been recived",Fore.GREEN)
             result = GPG.removeKey(self,state)
@@ -92,7 +97,7 @@ class app(QMainWindow):
                 self.removeKey()
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def encryptionSignal(self,status):
+    def encryptionSlot(self,status):
         if status is True:
             try:
                 self.sendLog("encryption signal has been recived",Fore.GREEN)
@@ -109,7 +114,7 @@ class app(QMainWindow):
                     self.encrypt()
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def decryptionSignal(self,status):
+    def decryptionSlot(self,status):
         if status is True:
             try:
                 status = GPG.decrypt(self,passphrase=self.decryptForm.passphraseLineEdit.text())
@@ -125,7 +130,7 @@ class app(QMainWindow):
                     self.decrypt()
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def exportSignal(self,status,armor):
+    def exportSlot(self,status,armor):
         try:
             result = GPG.export(self,status,armor)
             if not result[1]:
@@ -137,12 +142,12 @@ class app(QMainWindow):
             self.sendLog(str(ex),Fore.RED)
             result = QMessageBox.critical(self,"exporting a key",str(ex),QMessageBox.Retry|QMessageBox.Abort)
             if result == QMessageBox.Retry:
-                self.export() 
+                self.exportKey() 
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def importSignal(self,status):
+    def importSlot(self,status):
         try:
-            status = GPG.import_(self,status)
+            status = GPG.importKey(self,status)
             if status[1] == False:
                 QMessageBox.information(self,"importing a public key",status[0] + '\n',QMessageBox.Ok)
                 menuItems.__Load__(self)
@@ -154,14 +159,14 @@ class app(QMainWindow):
             self.sendLog(str(ex),Fore.RED)
             result = QMessageBox.critical(self,"importing a key",str(ex),QMessageBox.Retry|QMessageBox.Abort)
             if result == QMessageBox.Retry:
-                self.import_()
+                self.importKey()
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def privateCBChanged(self):
+    def privateCheckBoxSlot(self):
         menuItems.__Load__(self)
 #-------------------------------------------------------------------------------------------------------#
     @Slot()
-    def trustLVLChanged(self,mode):
+    def trustLevelSlot(self,mode):
         try:
             result = GPG.changeTrust(self,mode)
             QMessageBox.information(self,"changing a key trust value",result.status + '\n' + result.stderr,QMessageBox.Ok)
@@ -172,6 +177,14 @@ class app(QMainWindow):
             if result == QMessageBox.Retry:
                 self.trust()
 #-------------------------------------------------------------------------------------------------------#
+    @Slot()
+    def passDifficultySlot(self,difficulty):
+        try:
+            password, hashed_password = passwordGenerator.generatePassword(difficulty)
+            print(password + " " + hashed_password)
+        except Exception as ex:
+            pass
+#-------------------------------------------------------------------------------------------------------#
     def tableCellClicked(self,row,column):
         data = self.table.item(row,column)
         clipboard = QClipboard()
@@ -181,12 +194,16 @@ class app(QMainWindow):
             message = data.text()+'\nhas been copied in clipboard',
         )
 #-------------------------------------------------------------------------------------------------------#
+
+#--------------------------------------------Forms------------------------------------------------------#
+
+#-------------------------------------------------------------------------------------------------------#
     def removeKey(self):
         if self.removeKeyForm is None:
             try:
                 self.removeKeyForm = removeKeyForm()
                 self.removeKeyForm.show()
-                self.removeKeyForm.signal.connect(self.reciveAndDelete)
+                self.removeKeyForm.signal.connect(self.keyDelSlot)
                 self.sendLog("delete key form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -198,7 +215,7 @@ class app(QMainWindow):
                 self.removeKeyForm.close()
                 self.removeKeyForm = removeKeyForm()
                 self.removeKeyForm.show()
-                self.removeKeyForm.signal.connect(self.reciveAndDelete)
+                self.removeKeyForm.signal.connect(self.keyDelSlot)
                 self.sendLog("previous delete key form destroyed and again been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -211,7 +228,7 @@ class app(QMainWindow):
             try:
                 self.newKeyForm = newKeyForm()
                 self.newKeyForm.show()
-                self.newKeyForm.signal.connect(self.reciveAndGenerate)
+                self.newKeyForm.signal.connect(self.keyGenSlot)
                 self.sendLog("new key widget has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -223,7 +240,7 @@ class app(QMainWindow):
                 self.newKeyForm.close()
                 self.newKeyForm = newKeyForm()
                 self.newKeyForm.show()
-                self.newKeyForm.signal.connect(self.reciveAndGenerate)
+                self.newKeyForm.signal.connect(self.keyGenSlot)
                 self.sendLog("previoyus new key widget destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -284,7 +301,7 @@ class app(QMainWindow):
             try:
                 self.encryptForm = encryptForm()
                 self.encryptForm.show()
-                self.encryptForm.signal.connect(self.encryptionSignal)
+                self.encryptForm.signal.connect(self.encryptionSlot)
                 self.sendLog("encrypt form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -296,7 +313,7 @@ class app(QMainWindow):
                 self.encryptForm.close()
                 self.encryptForm = encryptForm()
                 self.encryptForm.show()
-                self.encryptForm.signal.connect(self.encryptionSignal)
+                self.encryptForm.signal.connect(self.encryptionSlot)
                 self.sendLog("previous encrypt form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -309,7 +326,7 @@ class app(QMainWindow):
             try:
                 self.decryptForm = decryptForm()
                 self.decryptForm.show()
-                self.decryptForm.signal.connect(self.decryptionSignal)
+                self.decryptForm.signal.connect(self.decryptionSlot)
                 self.sendLog("decrypt form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -321,7 +338,7 @@ class app(QMainWindow):
                 self.decryptForm.close()
                 self.decryptForm = decryptForm()
                 self.decryptForm.show()
-                self.decryptForm.signal.connect(self.decryptionSignal)
+                self.decryptForm.signal.connect(self.decryptionSlot)
                 self.sendLog("previous decrypt form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -329,55 +346,55 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.decrypt()
 #-------------------------------------------------------------------------------------------------------#
-    def export(self):
+    def exportKey(self):
         if self.exportForm is None:
             try:
                 self.exportForm = exportForm()
                 self.exportForm.show()
-                self.exportForm.signal.connect(self.exportSignal)
+                self.exportForm.signal.connect(self.exportSlot)
                 self.sendLog("export form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
                 result = QMessageBox.critical(self,"starting export form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
-                    self.export()
+                    self.exportKey()
         else:
             try:
                 self.exportForm.close()
                 self.exportForm = exportForm()
                 self.exportForm.show()
-                self.exportForm.signal.connect(self.exportSignal)
+                self.exportForm.signal.connect(self.exportSlot)
                 self.sendLog("previous export form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
                 result = QMessageBox.critical(self,"starting export form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
-                    self.export()
+                    self.exportKey()
 #-------------------------------------------------------------------------------------------------------#
-    def import_(self):
+    def importKey(self):
         if self.importForm is None:
             try:
                 self.importForm = importForm()
                 self.importForm.show()
-                self.importForm.signal.connect(self.importSignal)
+                self.importForm.signal.connect(self.importSlot)
                 self.sendLog("import form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
                 result = QMessageBox.critical(self,"starting import form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
-                    self.import_()
+                    self.importKey()
         else:
             try:
                 self.importForm.close()
                 self.importForm = importForm()
                 self.importForm.show()
-                self.importForm.signal.connect(self.importSignal)
+                self.importForm.signal.connect(self.importSlot)
                 self.sendLog("previous import form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
                 result = QMessageBox.critical(self,"starting import form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
-                    self.import_()
+                    self.importKey()
 #-------------------------------------------------------------------------------------------------------#
     def trust(self):
         if self.trustForm is None:
@@ -385,28 +402,54 @@ class app(QMainWindow):
                 self.trustForm = trustForm()
                 self.trustForm.show()
                 self.trustForm.getFingerprints(gpg.list_keys())
-                self.trustForm.signal.connect(self.trustLVLChanged)
+                self.trustForm.signal.connect(self.trustLevelSlot)
                 self.sendLog("trust form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
                 result = QMessageBox.critical(self,"starting import form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
-                    self.import_()
+                    self.trust()
         else:
             try:
                 self.trustForm.close()
                 self.trustForm = trustForm()
                 self.trustForm.show()
                 self.trustForm.getFingerprints(gpg.list_keys())
-                self.trustForm.signal.connect(self.trustLVLChanged)
+                self.trustForm.signal.connect(self.trustLevelSlot)
                 self.sendLog("previous trust form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
                 result = QMessageBox.critical(self,"starting trust form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
-                    self.import_()
+                    self.trust()
 #-------------------------------------------------------------------------------------------------------#
-#classes
+    def passGen(self):
+        if self.passGenForm is None:
+            try:
+                self.passGenForm = passGenForm()
+                self.passGenForm.show()
+                self.passGenForm.signal.connect(self.passDifficultySlot)
+                self.sendLog("pass generator form has been called",Fore.GREEN)
+            except Exception as ex:
+                self.sendLog(str(ex),Fore.RED)
+                result = QMessageBox.critical(self,"starting import form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
+                if result == QMessageBox.Retry:
+                    self.passGen()
+        else:
+            try:
+                self.passGenForm.close()
+                self.passGenForm = passGenForm()
+                self.passGenForm.show()
+                self.passGenForm.signal.connect(self.passDifficultySlot)
+                self.sendLog("previous password generator form destoryed and again called",Fore.GREEN)
+            except Exception as ex:
+                self.sendLog(str(ex),Fore.RED)
+                result = QMessageBox.critical(self,"starting passowrd generator form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
+                if result == QMessageBox.Retry:
+                    self.passGen()
+#-------------------------------------------------------------------------------------------------------#
+
+#other classes
 class topBarMenu():
     @staticmethod
     def __showTopBarItems__(QMainWindow):
@@ -414,6 +457,7 @@ class topBarMenu():
         topBarMenu.__keyMenu__(QMainWindow)
         topBarMenu.__dataProtectionMenu__(QMainWindow)
         topBarMenu.__keySharing__(QMainWindow)
+        topBarMenu.__password__(QMainWindow)
         topBarMenu.__helpMenu__(QMainWindow)
     @staticmethod
     def __keyMenu__(QMainWindow):
@@ -471,13 +515,25 @@ class topBarMenu():
         exportAction = QMainWindow.keySharingMenu.addAction("Export")
         exportAction.setStatusTip("exports a key")
         exportAction.setIcon(QIcon(appPath+"/pictures/export.png"))
-        exportAction.triggered.connect(QMainWindow.export)
+        exportAction.triggered.connect(QMainWindow.exportKey)
 
-        #7
         importAction = QMainWindow.keySharingMenu.addAction("Import")
         importAction.setStatusTip("imports a key")
         importAction.setIcon(QIcon(appPath+"/pictures/import.png"))
-        importAction.triggered.connect(QMainWindow.import_)
+        importAction.triggered.connect(QMainWindow.importKey)
+    @staticmethod
+    def __password__(QMainWindow):
+        QMainWindow.passwordMenu = QMainWindow.menuBar.addMenu("Password")
+
+        passGenAction = QMainWindow.passwordMenu.addAction("Password generator")
+        passGenAction.setStatusTip("generates a password based on different difficulty")
+        passGenAction.setIcon(QIcon(appPath+"/pictures/passGen.png"))
+        passGenAction.triggered.connect(QMainWindow.passGen)
+
+        passManagerAction = QMainWindow.passwordMenu.addAction("Password manager")
+        passManagerAction.setStatusTip("is being used to store and import or export passwords")
+        passManagerAction.setIcon(QIcon(appPath+"/pictures/import.png"))
+        #importAction.triggered.connect(QMainWindow.importKey)
 class menuItems():
     @staticmethod
     def __showMenuItems__(QMainWindow):
@@ -495,7 +551,7 @@ class menuItems():
         QMainWindow.table.setStatusTip("list of keys")
 
         QMainWindow.table.cellClicked.connect(QMainWindow.tableCellClicked)
-        QMainWindow.privateCB.stateChanged.connect(QMainWindow.privateCBChanged)
+        QMainWindow.privateCB.stateChanged.connect(QMainWindow.privateCheckBoxSlot)
 
         QMainWindow.verLayout.addWidget(QMainWindow.table)
         QMainWindow.verLayout.addWidget(QMainWindow.privateCB,alignment=Qt.AlignRight)
@@ -511,8 +567,8 @@ class menuItems():
         QMainWindow.table.setRowCount(len(gpg.list_keys()))
 
         QMainWindow.table.verticalHeader().setVisible(False)
-        QMainWindow.table.setFont(QFont("sans-serif",8))
-        QMainWindow.table.setHorizontalHeaderLabels(["Type","Name","Email","Fingerprint","trust"])
+        QMainWindow.table.setFont(QFont("sans-serif",12))
+        QMainWindow.table.setHorizontalHeaderLabels(["Type","Name","Email","Fingerprint","Trust"])
 
         QMainWindow.table.horizontalHeader().setSectionResizeMode(4,QHeaderView.Fixed) 
         QMainWindow.table.horizontalHeader().setSectionResizeMode(3,QHeaderView.Stretch) 
@@ -542,31 +598,52 @@ class menuItems():
     @staticmethod
     def __setStyles__(QMainWindow):
         QMainWindow.table.setStyleSheet("""
-        QTableWidget
+        QTableWidget 
         {
-            color : black;
-            font-family :sans-serif;
-            font-size : 12px; 
+            color: black;
+            font-family: "Helvetica Neue", sans-serif; /* Changes the font */
+            font-size: 12px;
             vertical-align: center;
-        }
-        QTableWidget
-        {
             margin-top: 35px;
             border-collapse: collapse;
-            border-radius:6px 6px 6px 6px;
+            border-radius: 0px 0px 6px 6px !important; /* Curves only the bottom corners */
             min-width: 400px;
-            margin-left : 10px;
-            margin-right : 10px;
-            margin-bottom : 25px;
-            alternate-background-color: #f2f2f2;
-            background-color : #c5c7c9;
+            margin-left: 10px;
+            margin-right: 10px;
+            margin-bottom: 25px;
+            alternate-background-color: #f2f2f2; /* Adds alternating row colors */
+            background-color: #e6e6e6; /* Lighter gray */
         }
-        QHeaderView::section {
-            background-color: #04AA6D;
-            border-bottom: thin solid #009879;
-            font-family : sans-serif;    
+
+        QHeaderView::section 
+        {
+            background-color: #1a75ff; /* Blue */
+            border-bottom: thin solid #0059b3; /* Darker blue */
+            font-family: "Helvetica Neue", sans-serif; /* Changes the font */    
             border: none;
             height: 22px;
+        }
+
+        QTableWidget::item 
+        {
+            padding: 5px; /* Adds padding to table cells */
+        }
+
+        QTableWidget::item:selected 
+        {
+            background-color: #b3d9ff; /* Light blue */
+        }
+
+        /* Adds a subtle hover effect to table cells */
+        QTableWidget::item:hover 
+        {
+            background-color: #f2f2f2;
+        }
+
+        /* Adds a hover effect to the table header */
+        QHeaderView::section:hover 
+        {
+            background-color: #3399ff; /* Lighter blue */
         }
         """)
     @staticmethod
@@ -703,7 +780,7 @@ class GPG(app):
             QMessageBox.critical(self,"decrypting a file",str(ex),QMessageBox.Ok)
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
-    def export(self,status,armor):
+    def exportKey(self,status,armor):
         if not status:
             pubKey = gpg.export_keys(self.exportForm.emailLineEdit.text(),armor=armor)
             if pubKey == '':
@@ -742,7 +819,7 @@ class GPG(app):
             return(selectedPath,True)
 #-------------------------------------------------------------------------------------------------------#
     @staticmethod
-    def import_(self,status):
+    def importKey(self,status):
         if not status:
             result = gpg.import_keys_file(self.importForm.keyPathLineEdit.text())
             if result.returncode == 0:
@@ -755,12 +832,32 @@ class GPG(app):
                 return (result.stderr,True)
             else:
                 raise Exception(result.stderr)
+#-------------------------------------------------------------------------------------------------------#
     @staticmethod
     def changeTrust(self,mode):
         result = gpg.trust_keys(self.trustForm.fingerprintCB.currentText(),mode)
         if result.status != 'ok':
             raise Exception(result.stderr)
         return result
+#-------------------------------------------------------------------------------------------------------#
+class passwordGenerator():
+    @staticmethod
+    def generatePassword(difficulty:str):
+        if difficulty == 'weak':
+            password : str = pwd.genword(entropy=24)
+            hashed_password : str = pbkdf2_sha256.hash(password)
+        elif difficulty == 'fair':
+            password : str = pwd.genword(entropy=36)
+            hashed_password : str = pbkdf2_sha256.hash(password)
+        elif difficulty == 'strong':
+            password : str = pwd.genword(entropy=48)
+            hashed_password : str = pbkdf2_sha256.hash(password)
+        elif difficulty == 'secure':
+            password : str = pwd.genword(entropy=56)
+            hashed_password : str = pbkdf2_sha256.hash(password)
+        return (password, hashed_password)
+
+
 def run():
     easyGPGTool = app()
     easyGPGTool.show()

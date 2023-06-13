@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QComboBox,QVBoxLayout
+from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QComboBox,QVBoxLayout,QApplication
 from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtGui import QScreen
 #-------------------------------------------------------------------------------------------------------#
 class newKeyForm(QWidget):
 #-------------------------------------------------------------------------------------------------------#
@@ -63,6 +64,13 @@ class newKeyForm(QWidget):
         VLayout2.addWidget(self.createButton,alignment=Qt.AlignCenter)
 
         self.setLayout(VLayout2)
+#-------------------------------------------------------------------------------------------------------#
+    def showEvent(self, event):
+        super().showEvent(event)
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 #-------------------------------------------------------------------------------------------------------#
     def textEdited(self):
         if self.fullNameLineEdit.text() == "" or self.passphraseLineEdit.text() == "" or self.emailLineEdit == "":

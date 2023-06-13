@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox,QFileDialog,QHBoxLayout
+from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox,QFileDialog,QHBoxLayout,QApplication
 from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtGui import QScreen
 import os
 #-------------------------------------------------------------------------------------------------------#
 class importForm(QWidget):
@@ -60,6 +61,13 @@ class importForm(QWidget):
         V_layout.addWidget(self.importButton, alignment= Qt.AlignCenter)
 
         self.setLayout(V_layout)
+#-------------------------------------------------------------------------------------------------------#
+    def showEvent(self, event):
+        super().showEvent(event)
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 #-------------------------------------------------------------------------------------------------------#
     def textEdited(self):
         if not self.privateKeyCB.isChecked():

@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox
+from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox,QApplication
 from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtGui import QScreen
 #-------------------------------------------------------------------------------------------------------#
 class removeKeyForm(QWidget):
 #-------------------------------------------------------------------------------------------------------#
@@ -46,6 +47,13 @@ class removeKeyForm(QWidget):
         V_layout.addWidget(self.removeButton, alignment= Qt.AlignCenter)
 
         self.setLayout(V_layout)
+#-------------------------------------------------------------------------------------------------------#
+    def showEvent(self, event):
+        super().showEvent(event)
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 #-------------------------------------------------------------------------------------------------------#
     def privateKeyCBChanged(self):
         if self.privateKeyCB.isChecked():

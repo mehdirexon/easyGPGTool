@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget,QPushButton,QLabel,QVBoxLayout
+from PySide6.QtWidgets import QWidget,QPushButton,QLabel,QVBoxLayout,QApplication
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QScreen
 #-------------------------------------------------------------------------------------------------------#
 class aboutUsForm(QWidget):
 #-------------------------------------------------------------------------------------------------------#
@@ -30,6 +31,13 @@ class aboutUsForm(QWidget):
         V_layout.addWidget(self.closeButton,alignment=Qt.AlignCenter | Qt.AlignRight)
     
         self.setLayout(V_layout)
+#-------------------------------------------------------------------------------------------------------#
+    def showEvent(self, event):
+        super().showEvent(event)
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 #-------------------------------------------------------------------------------------------------------#
     def getInformation(self,data):
         self.versionLabel.setText("version : " + data["version"])

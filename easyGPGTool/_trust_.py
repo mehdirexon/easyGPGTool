@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget,QPushButton,QLabel,QVBoxLayout,QComboBox,QHBoxLayout,QDial
+from PySide6.QtWidgets import QWidget,QPushButton,QLabel,QVBoxLayout,QComboBox,QHBoxLayout,QDial,QApplication
 from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtGui import QScreen
 #-------------------------------------------------------------------------------------------------------#
 class trustForm(QWidget):
     signal = Signal(str)
@@ -53,6 +54,13 @@ class trustForm(QWidget):
         V_layout.addWidget(self.changeButton, alignment= Qt.AlignCenter)
 
         self.setLayout(V_layout)
+#-------------------------------------------------------------------------------------------------------#
+    def showEvent(self, event):
+        super().showEvent(event)
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 #-------------------------------------------------------------------------------------------------------#
     def trustLVLChanged(self,value):
         if len(self.fingerprints) == 0:

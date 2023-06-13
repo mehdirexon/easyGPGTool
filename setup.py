@@ -1,9 +1,9 @@
-from setuptools import setup,find_packages
+from setuptools import setup
 with open('README.md','r')as f:
     long_description = f.read()
 setup(
     name='easyGPGTool',
-    version='0.1',
+    version='0.2',
     packages=['easyGPGTool'],
     include_package_data=True,
     long_description_content_type = 'text/x-rst',
