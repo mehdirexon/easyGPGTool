@@ -1,43 +1,36 @@
 from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox,QApplication
 from PySide6.QtCore import Qt,Signal,Slot
 from PySide6.QtGui import QScreen
-#-------------------------------------------------------------------------------------------------------#
 class exportForm(QWidget):
     signal = Signal(bool,bool)
-#-------------------------------------------------------------------------------------------------------#
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("exporting a key")
+        self.setWindowTitle("Exporting a key")
         self.setFixedHeight(170)
         self.setFixedWidth(300)
         #it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
-#-------------------------------------------------------------------------------------------------------#
-        #email
-        self.emailLabel = QLabel("email : ")
+
+        self.emailLabel = QLabel("Email : ")
         self.emailLineEdit= QLineEdit()
         self.emailLineEdit.textEdited.connect(self.textEdited)
        
         #passphrase
-        self.passphraseLabel = QLabel("passphrase : ")
+        self.passphraseLabel = QLabel("Passphrase : ")
         self.passphraseLabel.setHidden(True)
         self.passphraseLineEdit = QLineEdit()
         self.passphraseLineEdit.setHidden(True)
         self.passphraseLineEdit.setEchoMode(QLineEdit.EchoMode.Password)
         self.passphraseLineEdit.textEdited.connect(self.textEdited)
 
-        #private_key_check_box
-        self.privateCB = QCheckBox("private key")
+        self.privateCB = QCheckBox("Private key")
         self.privateCB.stateChanged.connect(self.privateCBChanged)
 
-        #binary_mode_check_box
-        self.binaryCB = QCheckBox("binary mode")
+        self.binaryCB = QCheckBox("Binary mode")
 
-        #export_button
-        self.exportButton = QPushButton("export")
+        self.exportButton = QPushButton("Export")
         self.exportButton.setDisabled(True)
         self.exportButton.clicked.connect(self.exportClicked)
-#-------------------------------------------------------------------------------------------------------#
         #layouts
         V_layout = QVBoxLayout()
 
@@ -52,14 +45,12 @@ class exportForm(QWidget):
 
         V_layout.addWidget(self.exportButton, alignment= Qt.AlignCenter)
         self.setLayout(V_layout)
-#-------------------------------------------------------------------------------------------------------#
     def showEvent(self, event):
         super().showEvent(event)
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
-#-------------------------------------------------------------------------------------------------------#
     def textEdited(self):
         if not self.privateCB.isChecked():
             if self.emailLineEdit.text() == "":
@@ -71,7 +62,6 @@ class exportForm(QWidget):
                 self.exportButton.setDisabled(True)
             else:
                 self.exportButton.setDisabled(False)
-#-------------------------------------------------------------------------------------------------------#
     def privateCBChanged(self):
         if self.privateCB.isChecked():
             self.exportButton.setDisabled(True)
@@ -83,7 +73,6 @@ class exportForm(QWidget):
             self.setFixedHeight(170)
             self.passphraseLabel.setHidden(True)
             self.passphraseLineEdit.setHidden(True)
-#-------------------------------------------------------------------------------------------------------#
     @Slot()
     def exportClicked(self):
         if self.privateCB.isChecked() and self.binaryCB.isChecked():

@@ -1,31 +1,29 @@
-from PySide6.QtWidgets import (QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication)
+from PySide6.QtWidgets import (QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication,QSystemTrayIcon)
 from PySide6.QtCore import (Slot,Qt)
 from PySide6.QtGui import (QIcon,QKeySequence,QFont,QClipboard,QScreen)
 from datetime import datetime
-from easyGPGTool._newkey_ import newKeyForm
-from easyGPGTool._patchNote_ import patchNoteForm
-from easyGPGTool._removeKey_ import removeKeyForm
-from easyGPGTool._aboutUs_ import aboutUsForm
-from easyGPGTool._encrypt_ import encryptForm
-from easyGPGTool._decrypt_ import decryptForm
-from easyGPGTool._export_ import exportForm
-from easyGPGTool._import_ import importForm
-from easyGPGTool._trust_ import trustForm
-from easyGPGTool._extensions_ import Ext
-from easyGPGTool._passGen_ import passGenForm
+from easyGPGTool.GUI._newkey_ import newKeyForm
+from easyGPGTool.GUI._patchNote_ import patchNoteForm
+from easyGPGTool.GUI._removeKey_ import removeKeyForm
+from easyGPGTool.GUI._aboutUs_ import aboutUsForm
+from easyGPGTool.GUI._encrypt_ import encryptForm
+from easyGPGTool.GUI._decrypt_ import decryptForm
+from easyGPGTool.GUI._export_ import exportForm
+from easyGPGTool.GUI._import_ import importForm
+from easyGPGTool.GUI._trust_ import trustForm
+from easyGPGTool.GUI._extensions_ import Ext
+from easyGPGTool.GUI._passGen_ import passGenForm
 from plyer import notification
-from passlib.hash import pbkdf2_sha256
-from passlib import pwd
 from colorama import Fore
 from glob import glob
-import gnupg,os,magic,sys,logging
+import gnupg,os,magic,sys
 #-------------------------------------------------------------------------------------------------------#
 gpg = gnupg.GPG(gnupghome='/home/'+os.getlogin()+'/.gnupg')
 gpg.encoding = 'utf-8'
 appPath = os.path.normpath(__file__ + os.sep + os.pardir)
 #-------------------------------------------------------------------------------------------------------#
 class app(QMainWindow):
-    __information__ = {"version" : "0.2","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
+    __information__ = {"version" : "0.2beta","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
     now = datetime.now()
 #-------------------------------------------------------------------------------------------------------#
     def __init__(self):
@@ -49,7 +47,7 @@ class app(QMainWindow):
         self.setWindowTitle("easyGPG tool")
         self.setMinimumHeight(600)
         self.setMinimumWidth(1000)
-        self.setWindowIcon(QIcon(appPath+"/pictures/logo.png"))
+        self.setWindowIcon(QIcon(appPath+"/images/logo.png"))
 
         #menu_table
         menuItems.__showMenuItems__(self)
@@ -177,15 +175,9 @@ class app(QMainWindow):
             if result == QMessageBox.Retry:
                 self.trust()
 #-------------------------------------------------------------------------------------------------------#
-    @Slot()
-    def passDifficultySlot(self,difficulty):
-        try:
-            password, hashed_password = passwordGenerator.generatePassword(difficulty)
-            print(password + " " + hashed_password)
-        except Exception as ex:
-            pass
-#-------------------------------------------------------------------------------------------------------#
     def tableCellClicked(self,row,column):
+        if column not in [2,3] :
+            return
         data = self.table.item(row,column)
         clipboard = QClipboard()
         clipboard.setText(str(data.text()))
@@ -325,8 +317,8 @@ class app(QMainWindow):
         if self.decryptForm is None:
             try:
                 self.decryptForm = decryptForm()
-                self.decryptForm.show()
                 self.decryptForm.signal.connect(self.decryptionSlot)
+                self.decryptForm.show()
                 self.sendLog("decrypt form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -428,7 +420,7 @@ class app(QMainWindow):
             try:
                 self.passGenForm = passGenForm()
                 self.passGenForm.show()
-                self.passGenForm.signal.connect(self.passDifficultySlot)
+                #self.passGenForm.signal.connect(self.passDifficultySlot)
                 self.sendLog("pass generator form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -440,7 +432,7 @@ class app(QMainWindow):
                 self.passGenForm.close()
                 self.passGenForm = passGenForm()
                 self.passGenForm.show()
-                self.passGenForm.signal.connect(self.passDifficultySlot)
+                #self.passGenForm.signal.connect(self.passDifficultySlot)
                 self.sendLog("previous password generator form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -466,18 +458,18 @@ class topBarMenu():
         newKey = QMainWindow.keyMenu.addAction("New key")
         newKey.setShortcut(QKeySequence(QKeySequence.New))
         newKey.triggered.connect(QMainWindow.newKey)
-        newKey.setIcon(QIcon(appPath+"/pictures/newIcon.png"))
+        newKey.setIcon(QIcon(appPath+"/icons/newIcon.png"))
         newKey.setStatusTip("creates a new key")
         #2
         trustKey = QMainWindow.keyMenu.addAction("Trust key")
         trustKey.triggered.connect(QMainWindow.trust)
-        trustKey.setIcon(QIcon(appPath+"/pictures/trust.png"))
+        trustKey.setIcon(QIcon(appPath+"/icons/trust.png"))
         trustKey.setStatusTip("changes trust lvl of a key")
         #3
         removeKey = QMainWindow.keyMenu.addAction("Remove key")
         removeKey.triggered.connect(QMainWindow.removeKey)
         removeKey.setShortcut(QKeySequence(QKeySequence.Delete))
-        removeKey.setIcon(QIcon(appPath+"/pictures/removeIcon.png"))
+        removeKey.setIcon(QIcon(appPath+"/icons/removeIcon.png"))
         removeKey.setStatusTip("removes a key")
     @staticmethod
     def __dataProtectionMenu__(QMainWindow):
@@ -485,13 +477,13 @@ class topBarMenu():
         encrypt = QMainWindow.dataProtection.addAction('Encrypt')
         encrypt.triggered.connect(QMainWindow.encrypt)
         encrypt.setStatusTip("encrypts a file")
-        encrypt.setIcon(QIcon(appPath + "/pictures/encrypt.png"))
+        encrypt.setIcon(QIcon(appPath + "/icons/encrypt.png"))
         encrypt.setShortcut(QKeySequence('Shift+E'))
         #5
         decrypt = QMainWindow.dataProtection.addAction('Decrypt')
         decrypt.triggered.connect(QMainWindow.decrypt)
         decrypt.setStatusTip('decrypts a file')
-        decrypt.setIcon(QIcon(appPath+'/pictures/decrypt.png'))
+        decrypt.setIcon(QIcon(appPath+'/icons/decrypt.png'))
         decrypt.setShortcut(QKeySequence('Shift+D'))
     @staticmethod
     def __helpMenu__(QMainWindow):
@@ -501,11 +493,11 @@ class topBarMenu():
         patchNote = QMainWindow.helpMenu.addAction("What's new")
         patchNote.setStatusTip("show lastest changes in the app")
         patchNote.triggered.connect(QMainWindow.patchNote)
-        patchNote.setIcon(QIcon(appPath+'/pictures/patchNote.png'))
+        patchNote.setIcon(QIcon(appPath+'/icons/patchNote.png'))
         #2
         aboutUs = QMainWindow.helpMenu.addAction("About us")
         aboutUs.setStatusTip("shows app and author information")
-        aboutUs.setIcon(QIcon(appPath+'/pictures/aboutUs.png'))
+        aboutUs.setIcon(QIcon(appPath+'/icons/aboutUs.png'))
         aboutUs.setShortcut(QKeySequence(QKeySequence.HelpContents))
         aboutUs.triggered.connect(QMainWindow.aboutUs)
     @staticmethod
@@ -514,12 +506,12 @@ class topBarMenu():
 
         exportAction = QMainWindow.keySharingMenu.addAction("Export")
         exportAction.setStatusTip("exports a key")
-        exportAction.setIcon(QIcon(appPath+"/pictures/export.png"))
+        exportAction.setIcon(QIcon(appPath+"/icons/export.png"))
         exportAction.triggered.connect(QMainWindow.exportKey)
 
         importAction = QMainWindow.keySharingMenu.addAction("Import")
         importAction.setStatusTip("imports a key")
-        importAction.setIcon(QIcon(appPath+"/pictures/import.png"))
+        importAction.setIcon(QIcon(appPath+"/icons/import.png"))
         importAction.triggered.connect(QMainWindow.importKey)
     @staticmethod
     def __password__(QMainWindow):
@@ -527,12 +519,13 @@ class topBarMenu():
 
         passGenAction = QMainWindow.passwordMenu.addAction("Password generator")
         passGenAction.setStatusTip("generates a password based on different difficulty")
-        passGenAction.setIcon(QIcon(appPath+"/pictures/passGen.png"))
+        passGenAction.setIcon(QIcon(appPath+"/icons/passGen.png"))
         passGenAction.triggered.connect(QMainWindow.passGen)
 
         passManagerAction = QMainWindow.passwordMenu.addAction("Password manager")
+        passManagerAction.setDisabled(True)
         passManagerAction.setStatusTip("is being used to store and import or export passwords")
-        passManagerAction.setIcon(QIcon(appPath+"/pictures/import.png"))
+        passManagerAction.setIcon(QIcon(appPath+"/icons/import.png"))
         #importAction.triggered.connect(QMainWindow.importKey)
 class menuItems():
     @staticmethod
@@ -580,8 +573,8 @@ class menuItems():
             type = QTableWidgetItem(str(key['type']))
             ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
             email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
-            fp = QTableWidgetItem(str(key['fingerprint']))                
-            trustLvl = QTableWidgetItem(str(key['trust'])) 
+            fp = QTableWidgetItem(str(key['fingerprint']))              
+            trustLvl = QTableWidgetItem(str(key['trust']))
 
             type.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             ID.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
@@ -840,31 +833,7 @@ class GPG(app):
             raise Exception(result.stderr)
         return result
 #-------------------------------------------------------------------------------------------------------#
-class passwordGenerator():
-    @staticmethod
-    def generatePassword(difficulty:str):
-        if difficulty == 'weak':
-            password : str = pwd.genword(entropy=24)
-            hashed_password : str = pbkdf2_sha256.hash(password)
-        elif difficulty == 'fair':
-            password : str = pwd.genword(entropy=36)
-            hashed_password : str = pbkdf2_sha256.hash(password)
-        elif difficulty == 'strong':
-            password : str = pwd.genword(entropy=48)
-            hashed_password : str = pbkdf2_sha256.hash(password)
-        elif difficulty == 'secure':
-            password : str = pwd.genword(entropy=56)
-            hashed_password : str = pbkdf2_sha256.hash(password)
-        return (password, hashed_password)
-
-
 def run():
-    easyGPGTool = app()
-    easyGPGTool.show()
-    easyGPGTool.app.exec()
-    del easyGPGTool.app
-
-if __name__ == "__main__":
     easyGPGTool = app()
     easyGPGTool.show()
     easyGPGTool.app.exec()

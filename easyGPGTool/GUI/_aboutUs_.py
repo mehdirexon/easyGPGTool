@@ -1,27 +1,21 @@
 from PySide6.QtWidgets import QWidget,QPushButton,QLabel,QVBoxLayout,QApplication
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
-#-------------------------------------------------------------------------------------------------------#
 class aboutUsForm(QWidget):
-#-------------------------------------------------------------------------------------------------------#
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("about us")
+        self.setWindowTitle("About us")
         #it locks parent form when child is active
         self.setFixedHeight(120)
         self.setFixedWidth(250)
         self.setWindowModality(Qt.ApplicationModal)
-#-------------------------------------------------------------------------------------------------------#
-        #version_label
+
         self.versionLabel = QLabel()
-        #author_label
         self.authorLabel = QLabel()
-        #email_label
         self.emailLabel = QLabel()
-        #close_button
-        self.closeButton = QPushButton("close")
+        self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.closeButtonClicked)
-#-------------------------------------------------------------------------------------------------------#
+
         #layouts
         V_layout = QVBoxLayout()
         V_layout.addWidget(self.versionLabel,alignment= Qt.AlignTop)
@@ -31,18 +25,16 @@ class aboutUsForm(QWidget):
         V_layout.addWidget(self.closeButton,alignment=Qt.AlignCenter | Qt.AlignRight)
     
         self.setLayout(V_layout)
-#-------------------------------------------------------------------------------------------------------#
     def showEvent(self, event):
         super().showEvent(event)
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
-#-------------------------------------------------------------------------------------------------------#
+
     def getInformation(self,data):
-        self.versionLabel.setText("version : " + data["version"])
-        self.authorLabel.setText("author : " + data["author"])
-        self.emailLabel.setText("email : " + data["author_email"])
-#-------------------------------------------------------------------------------------------------------#
+        self.versionLabel.setText("Version : " + data["version"])
+        self.authorLabel.setText("Author : " + data["author"])
+        self.emailLabel.setText("Email : " + data["author_email"])
     def closeButtonClicked(self):
         self.close()

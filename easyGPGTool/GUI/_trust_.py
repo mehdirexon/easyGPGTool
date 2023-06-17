@@ -1,45 +1,34 @@
 from PySide6.QtWidgets import QWidget,QPushButton,QLabel,QVBoxLayout,QComboBox,QHBoxLayout,QDial,QApplication
 from PySide6.QtCore import Qt,Signal,Slot
 from PySide6.QtGui import QScreen
-#-------------------------------------------------------------------------------------------------------#
 class trustForm(QWidget):
     signal = Signal(str)
-#-------------------------------------------------------------------------------------------------------#
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("changing a key trust level")
+        self.setWindowTitle("Changing a key trust level")
         self.setFixedHeight(300)
         self.setFixedWidth(700)
         #it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
-#-------------------------------------------------------------------------------------------------------#
-        #fingerprints combo box
+
         self.fingerprintCB = QComboBox()
         self.fingerprintCB.currentIndexChanged.connect(self.fingerpintCBIndexChanged)
 
         self.fingerprints = []
         self.IDs = []
 
-        #ID Label
         self.IDLabel = QLabel()
-
-        #trust lvl text
         self.trustText = QLabel('TRUST_UNDEFINED')
-
-        #trust lvl
         self.trust = ''
 
-        #change button
-        self.changeButton = QPushButton("change")
+        self.changeButton = QPushButton("Change")
         self.changeButton.setEnabled(False)
         self.changeButton.clicked.connect(self.changeClicked)
 
-        #dial
         self.trustLVL = QDial()
         self.trustLVL.valueChanged.connect(self.trustLVLChanged)
         self.trustLVL.setRange(1,5)
         self.trustLVL.setNotchesVisible(True)
-#-------------------------------------------------------------------------------------------------------#
         #layouts
         V_layout = QVBoxLayout()
         V_layout.addWidget(self.fingerprintCB)
@@ -54,14 +43,12 @@ class trustForm(QWidget):
         V_layout.addWidget(self.changeButton, alignment= Qt.AlignCenter)
 
         self.setLayout(V_layout)
-#-------------------------------------------------------------------------------------------------------#
     def showEvent(self, event):
         super().showEvent(event)
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
-#-------------------------------------------------------------------------------------------------------#
     def trustLVLChanged(self,value):
         if len(self.fingerprints) == 0:
             self.changeButton.setDisabled(True)
@@ -82,7 +69,6 @@ class trustForm(QWidget):
         else:
             self.trustText.setText('TRUST_ULTIMATE')
             self.trust = 'TRUST_ULTIMATE'
-#-------------------------------------------------------------------------------------------------------#
     def fingerpintCBIndexChanged(self,index):
         self.IDLabel.setText(self.IDs[index][0])
     def getFingerprints(self,fp):
@@ -90,7 +76,6 @@ class trustForm(QWidget):
             self.fingerprints.append(key['fingerprint'])
             self.IDs.append(key['uids'])
         self.fingerprintCB.addItems(self.fingerprints)
-#-------------------------------------------------------------------------------------------------------#
     @Slot()
     def changeClicked(self):
         self.signal.emit(self.trust)

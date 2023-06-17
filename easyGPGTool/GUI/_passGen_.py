@@ -1,12 +1,10 @@
 from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QApplication,QSlider,QCheckBox
-from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen,QClipboard
 from passlib.hash import pbkdf2_sha256
 from passlib import pwd
 from plyer import notification
 class passGenForm(QWidget):
-    signal = Signal(str)
-
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Password Generator")
@@ -28,9 +26,9 @@ class passGenForm(QWidget):
         self.passLineEdit = QLineEdit(self)
         self.passLineEdit.mousePressEvent = self.passLineEditClicked
         self.passLineEdit.setReadOnly(True)
-
-        self.saveCheckBox = QCheckBox("Save")
-        self.saveCheckBox.setToolTip("Check this box to save the generated password in the app’s database.")
+        #for ver0.3
+        #self.saveCheckBox = QCheckBox("Save")
+        #self.saveCheckBox.setToolTip("Check this box to save the generated password in the app’s database.")
         self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.closeClicked)
 
@@ -38,7 +36,7 @@ class passGenForm(QWidget):
         V_layout.addWidget(self.paswrodLVLLabel)
         V_layout.addWidget(self.difficultySlider)
         V_layout.addWidget(self.informationLabel)
-        V_layout.addWidget(self.saveCheckBox)
+        #V_layout.addWidget(self.saveCheckBox)
         V_layout.addWidget(self.passLineEdit)
         V_layout.addStretch()
         V_layout.addWidget(self.closeButton, alignment= Qt.AlignCenter)
@@ -65,8 +63,6 @@ class passGenForm(QWidget):
             app_name='easy GPG tool'
         )
 
-
-    @Slot()
     def closeClicked(self):
         #self.signal.emit(self.passwordLVL.currentText())   
         self.close()

@@ -2,31 +2,27 @@ from PySide6.QtWidgets import QWidget,QPushButton,QVBoxLayout,QTextEdit,QComboBo
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
 import os
-#-------------------------------------------------------------------------------------------------------#
 class patchNoteForm(QWidget):
-#-------------------------------------------------------------------------------------------------------#
+
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("latest patch note")
+        self.setWindowTitle("Latest patch note")
         self.setFixedWidth(1000)
         self.setFixedHeight(400)
         self.setWindowModality(Qt.ApplicationModal)
-#-------------------------------------------------------------------------------------------------------#
-        #text_box
+
         self.textBox = QTextEdit()
         self.textBox.setReadOnly(True)
         self.textBox.setFixedHeight(300)
 
-        #version_combo_box
         self.verComboBox = QComboBox()
         self.verComboBox.currentIndexChanged.connect(self.autoLoad)
         self.verComboBox.addItems(["0.1beta","0.1","0.2"])
         self.verComboBox.setCurrentIndex(2)
 
-        #close_button
-        self.closeButton = QPushButton("close")
+        self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.closeClicked)
-#-------------------------------------------------------------------------------------------------------#
+
         #layouts
         V_layout = QVBoxLayout()
 
@@ -35,17 +31,14 @@ class patchNoteForm(QWidget):
         V_layout.addWidget(self.closeButton,alignment=Qt.AlignCenter | Qt.AlignRight)
     
         self.setLayout(V_layout)
-#-------------------------------------------------------------------------------------------------------#
     def showEvent(self, event):
         super().showEvent(event)
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
-#-------------------------------------------------------------------------------------------------------#
     def closeClicked(self):
         self.close()
-#-------------------------------------------------------------------------------------------------------#
     def autoLoad(self):
         ver = self.verComboBox.currentText()
         appPath = os.path.normpath(__file__+ os.sep + os.pardir)
