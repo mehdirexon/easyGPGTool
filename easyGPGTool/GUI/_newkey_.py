@@ -1,13 +1,14 @@
-from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QComboBox,QVBoxLayout,QApplication
+from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QComboBox,QVBoxLayout,QApplication,QMessageBox
 from PySide6.QtCore import Qt,Signal,Slot
 from PySide6.QtGui import QScreen
+import re
 class newKeyForm(QWidget):
     signal = Signal(dict)
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Creating a new key")
         self.setFixedHeight(350)
-        self.setFixedWidth(300)
+        self.setFixedWidth(500)
         #it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
 
@@ -55,6 +56,11 @@ class newKeyForm(QWidget):
         VLayout2.addWidget(self.createButton,alignment=Qt.AlignCenter)
 
         self.setLayout(VLayout2)
+    def validateEmail(self):
+        if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.emailLineEdit.text()):
+            return True
+        else:
+            return False
     def showEvent(self, event):
         super().showEvent(event)
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
@@ -62,12 +68,16 @@ class newKeyForm(QWidget):
         geo.moveCenter(center)
         self.move(geo.topLeft())
     def textEdited(self):
-        if self.fullNameLineEdit.text() == "" or self.passphraseLineEdit.text() == "" or self.emailLineEdit == "":
+        if self.fullNameLineEdit.text() == "" or self.passphraseLineEdit.text() == "" or self.emailLineEdit.text() == "":
             self.createButton.setDisabled(True)
         else:
             self.createButton.setDisabled(False)
     @Slot()
     def createClicked(self):
+        if not self.validateEmail():
+            QMessageBox.critical(self,"Validation error","Email must be valid",QMessageBox.Ok)
+            return
+
         data = {
             "fullname" : self.fullNameLineEdit.text(),
             "email" : self.emailLineEdit.text(),
