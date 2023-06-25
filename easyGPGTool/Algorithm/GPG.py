@@ -144,8 +144,8 @@ class GPG():
     def sendLog(self,txt_or_exception,status):
         from datetime import datetime
         print(f"{status}[LOG]",datetime.now(),txt_or_exception,f" {Fore.RESET}")
-    def changeTrust(self,mode):
-        result = self.gpg.trust_keys(self.trustForm.fingerprintCB.currentText(),mode)
+    def changeTrust(self,mainWindow,mode):
+        result = self.gpg.trust_keys(mainWindow.trustForm.fingerprintCB.currentText(),mode)
         if result.status != 'ok':
             raise Exception(result.stderr)
         return result

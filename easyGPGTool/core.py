@@ -151,7 +151,7 @@ class app(QMainWindow):
     @Slot()
     def trustLevelSlot(self,mode):
         try:
-            result = gpg.changeTrust(mode)
+            result = gpg.changeTrust(self,mode)
             QMessageBox.information(self,"Changing a key trust value",result.status + '\n' + result.stderr,QMessageBox.Ok)
             menuItems.__Load__(self)
         except Exception as ex:
@@ -369,7 +369,7 @@ class app(QMainWindow):
             try:
                 self.trustForm = trustForm()
                 self.trustForm.show()
-                self.trustForm.getFingerprints(gpg.list_keys())
+                self.trustForm.getFingerprints(gpg.getKeys())
                 self.trustForm.signal.connect(self.trustLevelSlot)
                 self.sendLog("Trust form has been called",Fore.GREEN)
             except Exception as ex:
@@ -382,7 +382,7 @@ class app(QMainWindow):
                 self.trustForm.close()
                 self.trustForm = trustForm()
                 self.trustForm.show()
-                self.trustForm.getFingerprints(gpg.list_keys())
+                self.trustForm.getFingerprints(gpg.getKeys())
                 self.trustForm.signal.connect(self.trustLevelSlot)
                 self.sendLog("Previous trust form destoryed and again called",Fore.GREEN)
             except Exception as ex:
