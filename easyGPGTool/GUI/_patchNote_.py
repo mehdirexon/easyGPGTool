@@ -41,7 +41,7 @@ class patchNoteForm(QWidget):
         self.close()
     def autoLoad(self):
         ver = self.verComboBox.currentText()
-        appPath = os.path.normpath(__file__+ os.sep + os.pardir)
+        appPath = os.path.dirname(os.path.normpath(os.path.abspath(__file__) + os.sep + os.pardir))
         if ver == "0.1beta" :
             self.textBox.clear()
             with open(appPath+"/patch_notes/beta_patch_note.log","r") as file:
