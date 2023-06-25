@@ -1,4 +1,5 @@
 import gnupg,os
+from datetime import datetime
 from colorama import Fore
 class GPG():
     def __init__(self):
@@ -138,6 +139,8 @@ class GPG():
                 return (result.stderr,True)
             else:
                 raise Exception(result.stderr)
+    def sendLog(self,txt_or_exception,status):
+        print(f"{status}[LOG]",datetime.now(),txt_or_exception,f" {Fore.RESET}")
     def changeTrust(self,mode):
         result = self.gpg.trust_keys(self.trustForm.fingerprintCB.currentText(),mode)
         if result.status != 'ok':
