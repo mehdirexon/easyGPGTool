@@ -63,7 +63,7 @@ class app(QMainWindow):
         try:
             self.sendLog("Recive and generate signal has been recived",Fore.GREEN)
             gpg.generate_key(data)
-            QMessageBox.information(self,"Successful task","fingerprint : " + GPG.key,QMessageBox.Ok)
+            QMessageBox.information(self,"Successful task","fingerprint : " + gpg.key,QMessageBox.Ok)
             menuItems.__Load__(self)
         except Exception as ex:
             self.sendLog(str(ex),Fore.RED)
@@ -74,7 +74,7 @@ class app(QMainWindow):
     def keyDelSlot(self,state):
         try:
             self.sendLog("Recive and delete signal has been recived",Fore.GREEN)
-            result = gpg.removeKey(state)
+            result = gpg.removeKey(self,state)
             if result.status == 'ok':
                 self.sendLog("A key was deleted",Fore.GREEN)
                 QMessageBox.information(self,"Successful task","key has been deleted successfully",QMessageBox.Ok)
@@ -652,7 +652,7 @@ class menuItems():
                 fp.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                 trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
-                QMainWindow.table.setRowCount(len(gpg.list_keys(True)))
+                QMainWindow.table.setRowCount(len(gpg.getKeys(True)))
 
                 QMainWindow.table.setItem(row,0,type)
                 QMainWindow.table.setItem(row,1,ID)

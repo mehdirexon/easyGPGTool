@@ -6,8 +6,11 @@ class GPG():
         os.environ["GPG_AGENT_INFO"] = ""
         self.gpg = gnupg.GPG(gnupghome='/home/'+os.getlogin()+'/.gnupg')
         self.gpg.encoding = 'utf-8'
-    def getKeys(self):
-        return self.gpg.list_keys()
+    def getKeys(self,secret : bool= False ):
+        if secret:
+            return self.gpg.list_keys(secret=True)
+        else:
+            return self.gpg.list_keys(secret=False)
     def generate_key(self,data):
         inputData = self.gpg.gen_key_input(
             name_email = data['email'],
@@ -22,9 +25,9 @@ class GPG():
             raise Exception("the app couldn't create a key")
         else:
             self.sendLog("a key created with this fingerprint : " + GPG.key ,Fore.GREEN)
-    def removeKey(self,state):
+    def removeKey(self,mainWindow,state):
         if state:
-            result = self.gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text(),passphrase= self.removeKeyForm.passphraseLineEdit.text(),secret=True)
+            result = self.gpg.delete_keys(mainWindow.removeKeyForm.fingerprintLineEdit.text(),passphrase= mainWindow.removeKeyForm.passphraseLineEdit.text(),secret=True)
             if result.status == 'ok':
                 GPG.key = ''
                 return result
@@ -32,7 +35,7 @@ class GPG():
                 self.sendLog(result.stderr,Fore.RED)
                 raise Exception(result.stderr)
         else:
-            result = self.gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text())
+            result = self.gpg.delete_keys(mainWindow.removeKeyForm.fingerprintLineEdit.text())
             if result.status == 'ok':
                 GPG.key = ''
                 return result
