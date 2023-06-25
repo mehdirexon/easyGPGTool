@@ -11,20 +11,18 @@ from easyGPGTool.GUI._decrypt_ import decryptForm
 from easyGPGTool.GUI._export_ import exportForm
 from easyGPGTool.GUI._import_ import importForm
 from easyGPGTool.GUI._trust_ import trustForm
-from easyGPGTool.GUI._extensions_ import Ext
 from easyGPGTool.GUI._passGen_ import passGenForm
+from easyGPGTool.Algorithm.GPG import GPG
 from plyer import notification
 from colorama import Fore
 from glob import glob
-import gnupg,os,magic,sys
+import os,sys
 
-os.environ["GPG_AGENT_INFO"] = ""
-gpg = gnupg.GPG(gnupghome='/home/'+os.getlogin()+'/.gnupg')
-gpg.encoding = 'utf-8'
+
+gpg = GPG()
 appPath = os.path.normpath(__file__ + os.sep + os.pardir)
 class app(QMainWindow):
     __information__ = {"version" : "0.2beta","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
-    now = datetime.now()
     def __init__(self):
         #basics
         self.app = QApplication(sys.argv)
@@ -40,7 +38,6 @@ class app(QMainWindow):
         self.importForm = None
         self.trustForm = None
         self.passGenForm = None
-
 
         #basic configs
         self.setWindowTitle("easyGPG tool")
@@ -60,12 +57,12 @@ class app(QMainWindow):
         geo.moveCenter(center)
         self.move(geo.topLeft())
     def sendLog(self,txt_or_exception,status):
-        print(f"{status}[LOG]",self.now.strftime("%H:%M:%S :"),txt_or_exception,f" {Fore.RESET}")
+        print(f"{status}[LOG]",datetime.now(),txt_or_exception,f" {Fore.RESET}")
     @Slot()
     def keyGenSlot(self,data):
         try:
             self.sendLog("Recive and generate signal has been recived",Fore.GREEN)
-            GPG.generate_key(self,data)
+            gpg.generate_key(data)
             QMessageBox.information(self,"Successful task","fingerprint : " + GPG.key,QMessageBox.Ok)
             menuItems.__Load__(self)
         except Exception as ex:
@@ -77,7 +74,7 @@ class app(QMainWindow):
     def keyDelSlot(self,state):
         try:
             self.sendLog("Recive and delete signal has been recived",Fore.GREEN)
-            result = GPG.removeKey(self,state)
+            result = gpg.removeKey(state)
             if result.status == 'ok':
                 self.sendLog("A key was deleted",Fore.GREEN)
                 QMessageBox.information(self,"Successful task","key has been deleted successfully",QMessageBox.Ok)
@@ -92,7 +89,7 @@ class app(QMainWindow):
         if status is True:
             try:
                 self.sendLog("Encryption signal has been recived",Fore.GREEN)
-                status = GPG.encrypt(self,self.encryptForm.emailLineEdit.text())
+                status = gpg.encrypt(self.encryptForm.emailLineEdit.text())
                 if status.ok is True:
                     QMessageBox.information(self,"Encrypting a file",str(status.stderr) + "\n"+ str(status.status),QMessageBox.Ok)
                     self.sendLog("An encryption task has been successfully done",Fore.GREEN)
@@ -107,7 +104,7 @@ class app(QMainWindow):
     def decryptionSlot(self,status):
         if status is True:
             try:
-                status = GPG.decrypt(self,passphrase=self.decryptForm.passphraseLineEdit.text())
+                status = gpg.decrypt(passphrase=self.decryptForm.passphraseLineEdit.text())
                 if status.ok is True:
                     QMessageBox.information(self,"Decrypting a file",str(status.stderr) + "\n"+ str(status.status) +"\n"+ str(status.valid) +"\n"+ str(status.trust_text),QMessageBox.Ok)
                     self.sendLog("A decryption task has been successfully done",Fore.GREEN)
@@ -121,7 +118,7 @@ class app(QMainWindow):
     @Slot()
     def exportSlot(self,status,armor):
         try:
-            result = GPG.export(self,status,armor)
+            result = gpg.export(status,armor)
             if not result[1]:
                 QMessageBox.information(self,"Exporting a key","public key has been created at\n" + result[0] + "\nsuccessfully",QMessageBox.Ok)
 
@@ -135,7 +132,7 @@ class app(QMainWindow):
     @Slot()
     def importSlot(self,status):
         try:
-            status = GPG.importKey(self,status)
+            status = gpg.importKey(status)
             if status[1] == False:
                 QMessageBox.information(self,"Importing a public key",status[0] + '\n',QMessageBox.Ok)
                 menuItems.__Load__(self)
@@ -154,7 +151,7 @@ class app(QMainWindow):
     @Slot()
     def trustLevelSlot(self,mode):
         try:
-            result = GPG.changeTrust(self,mode)
+            result = gpg.changeTrust(mode)
             QMessageBox.information(self,"Changing a key trust value",result.status + '\n' + result.stderr,QMessageBox.Ok)
             menuItems.__Load__(self)
         except Exception as ex:
@@ -534,7 +531,7 @@ class menuItems():
         QMainWindow.table.setAlternatingRowColors(True)
 
         QMainWindow.table.setColumnCount(5)
-        QMainWindow.table.setRowCount(len(gpg.list_keys()))
+        QMainWindow.table.setRowCount(len(gpg.getKeys()))
 
         QMainWindow.table.verticalHeader().setVisible(False)
         QMainWindow.table.setFont(QFont("sans-serif",12))
@@ -546,7 +543,7 @@ class menuItems():
         QMainWindow.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.Fixed)
         QMainWindow.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Fixed)
 
-        for row,key in enumerate(gpg.list_keys()):
+        for row,key in enumerate(gpg.getKeys()):
             type = QTableWidgetItem(str(key['type']))
             ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
             email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
@@ -558,7 +555,7 @@ class menuItems():
             email.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             fp.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter) 
-            QMainWindow.table.setRowCount(len(gpg.list_keys()))
+            QMainWindow.table.setRowCount(len(gpg.getKeys()))
 
             QMainWindow.table.setItem(row,0,type)
             QMainWindow.table.setItem(row,1,ID)
@@ -621,7 +618,7 @@ class menuItems():
         QMainWindow.table.clear()
         QMainWindow.table.setHorizontalHeaderLabels(["Type","Name","Email","Fingerprint","trust"])
         if not QMainWindow.privateCB.isChecked():
-            for row,key in enumerate(gpg.list_keys()):
+            for row,key in enumerate(gpg.getKeys()):
                 type = QTableWidgetItem(str(key['type']))
                 ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
                 email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
@@ -634,7 +631,7 @@ class menuItems():
                 fp.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                 trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
-                QMainWindow.table.setRowCount(len(gpg.list_keys()))
+                QMainWindow.table.setRowCount(len(gpg.getKeys()))
 
                 QMainWindow.table.setItem(row,0,type)
                 QMainWindow.table.setItem(row,1,ID)
@@ -642,7 +639,7 @@ class menuItems():
                 QMainWindow.table.setItem(row,3,fp)
                 QMainWindow.table.setItem(row,4,trustLvl)
         else:
-            for row,key in enumerate(gpg.list_keys(True)):
+            for row,key in enumerate(gpg.getKeys(True)):
                 type = QTableWidgetItem(str(key['type']))
                 ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
                 email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
@@ -662,156 +659,15 @@ class menuItems():
                 QMainWindow.table.setItem(row,2,email)
                 QMainWindow.table.setItem(row,3,fp)
                 QMainWindow.table.setItem(row,4,trustLvl)
-class GPG(app):
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def generate_key(self,data):
-        inputData = gpg.gen_key_input(
-            name_email = data['email'],
-            passphrase = data['passphrase'],
-            key_type = data['key_type'],
-            key_length = data['key_length'],
-            name_real = data['fullname']
-            )
-        GPG.key = str(gpg.gen_key(inputData))
-        if GPG.key == '':
-            self.sendLog("the app couldn't create a key",Fore.RED)
-            raise Exception("the app couldn't create a key")
-        else:
-            self.sendLog("a key created with this fingerprint : " + GPG.key ,Fore.GREEN)
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def removeKey(self,state):
-        if state:
-            result = gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text(),passphrase= self.removeKeyForm.passphraseLineEdit.text(),secret=True)
-            if result.status == 'ok':
-                GPG.key = ''
-                return result
-            else:
-                self.sendLog(result.stderr,Fore.RED)
-                raise Exception(result.stderr)
-        else:
-            result = gpg.delete_keys(self.removeKeyForm.fingerprintLineEdit.text())
-            if result.status == 'ok':
-                GPG.key = ''
-                return result
-            else:
-                self.sendLog(result.stderr,Fore.RED)
-                raise Exception(result.stderr)
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def encrypt(self,email):
-        permission = False
-        if gpg.list_keys(False) == [] and gpg.list_keys(True) == []:
-            raise Exception("No such key")
-        #-----------------------------------------------------------
-        for this in gpg.list_keys(True):
-            a = this['uids'][0].split('<')[1].replace('>','')
-            if this['uids'][0].split('<')[1].replace('>','') == email:
-                permission = True
-                break
-        #-----------------------------------------------------------      
-        if permission is not True:
-            raise Exception("No such key")
-        #-----------------------------------------------------------      
-        else:
-            selectedFile = QFileDialog.getOpenFileName(self,"select your file","/home/" + os.getlogin() + "/Desktop")
-            if not self.encryptForm.signCB.isChecked():
-                with open(os.path.abspath(selectedFile[0]), 'rb') as file:
-                    status = gpg.encrypt_file(file,recipients = email,output = os.path.splitext(selectedFile[0])[0] + '.safe')
-            else:
-                with open(os.path.abspath(selectedFile[0]), 'rb') as file:
-                    status = gpg.encrypt_file(file,recipients = email,output = os.path.splitext(selectedFile[0])[0] + '.safe',sign=self.encryptForm.fingerprintLineEdit.text(),passphrase=self.encryptForm.passphraseLineEdit.text())
-        return status
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def decrypt(self,passphrase):
-        fileExtension = 'log'
-                  
-        selectedFile = QFileDialog.getOpenFileName(self,"select your decrypted file","/home/" + os.getlogin() + "/Desktop",filter="*.safe")
-        try:
-            if selectedFile == '':
-                raise Exception("path is empty")
-            with open(str(selectedFile[0]), 'rb') as file:
-                status = gpg.decrypt_file(file,passphrase = passphrase ,output= os.path.splitext(selectedFile[0])[0])
-            
-            with open(os.path.splitext(selectedFile[0])[0], 'rb') as file:
-                tmpExtFile = magic.from_file(os.path.splitext(selectedFile[0])[0], mime = True)
-                
-            for ext in Ext.data.keys():
-                if Ext.data[ext]['mime'] == tmpExtFile:
-                    fileExtension = ext
-                    break
 
-            os.rename(os.path.splitext(selectedFile[0])[0],os.path.splitext(selectedFile[0])[0] + '.'+ fileExtension)
-
-            return status
-        except Exception as ex:
-            QMessageBox.critical(self,"decrypting a file",str(ex),QMessageBox.Ok)
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def exportKey(self,status,armor):
-        if not status:
-            pubKey = gpg.export_keys(self.exportForm.emailLineEdit.text(),armor=armor)
-            if pubKey == '':
-                raise Exception('no such key(invalid ID)')
-            
-            selectedPath = QFileDialog.getExistingDirectory(self,"select your file","/home/" + os.getlogin() + "/Desktop")
-
-            if selectedPath == '':
-                raise Exception("empty path can not be used")
-            
-            if armor:
-                with open(selectedPath + '/pubKey.asc',"w") as file:
-                    file.write(pubKey)
-            else:
-                with open(selectedPath + '/pubKey',"wb") as file:
-                    file.write(pubKey)
-
-            return (selectedPath,False)
-        else:
-            privateKey = gpg.export_keys(self.exportForm.emailLineEdit.text(),True,passphrase=self.exportForm.passphraseLineEdit.text(),armor=armor)
-            if privateKey == '':
-                raise Exception("id is not valid")
-            
-            selectedPath = QFileDialog.getExistingDirectory(self,"select your file","/home/" + os.getlogin() + "/Desktop")
-
-            if selectedPath == '':
-                raise Exception("empty path can not be used")
-            
-            if armor:
-                with open(selectedPath + '/privateKey.asc',"w") as file:
-                    file.write(privateKey)
-            else:
-                with open(selectedPath + '/privateKey',"wb") as file:
-                    file.write(privateKey)
-
-            return(selectedPath,True)
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def importKey(self,status):
-        if not status:
-            result = gpg.import_keys_file(self.importForm.keyPathLineEdit.text())
-            if result.returncode == 0:
-                return (result.stderr,False)
-            else:
-                raise Exception(result.stderr)
-        else:
-            result = gpg.import_keys_file(self.importForm.keyPathLineEdit.text(),passphrase = self.importForm.passphraseLineEdit.text())
-            if result.returncode == 0:
-                return (result.stderr,True)
-            else:
-                raise Exception(result.stderr)
-#-------------------------------------------------------------------------------------------------------#
-    @staticmethod
-    def changeTrust(self,mode):
-        result = gpg.trust_keys(self.trustForm.fingerprintCB.currentText(),mode)
-        if result.status != 'ok':
-            raise Exception(result.stderr)
-        return result
-#-------------------------------------------------------------------------------------------------------#
+#-------------------------------------------------------------------------------------------------------#"""
 def run():
+    import time
+    start_time = time.time()
     easyGPGTool = app()
     easyGPGTool.show()
+    end_time = time.time()
+    compile_time = end_time - start_time
+    print("Compile time:", compile_time)
     easyGPGTool.app.exec()
     del easyGPGTool.app
