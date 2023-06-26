@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import (QMainWindow,QStatusBar,QMessageBox,QFileDialog,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication,QSystemTrayIcon)
+from PySide6.QtWidgets import (QMainWindow,QStatusBar,QMessageBox,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication)
 from PySide6.QtCore import (Slot,Qt)
 from PySide6.QtGui import (QIcon,QKeySequence,QFont,QClipboard,QScreen)
 from datetime import datetime
@@ -17,7 +17,6 @@ from plyer import notification
 from colorama import Fore
 from glob import glob
 import os,sys
-
 
 gpg = GPG()
 appPath = os.path.normpath(__file__ + os.sep + os.pardir)
@@ -414,8 +413,6 @@ class app(QMainWindow):
                 result = QMessageBox.critical(self,"starting passowrd generator form",str(ex),QMessageBox.Retry|QMessageBox.Abort)
                 if result == QMessageBox.Retry:
                     self.passGen()
-
-#other classes
 class topBarMenu():
     @staticmethod
     def __showTopBarItems__(QMainWindow):
@@ -659,15 +656,13 @@ class menuItems():
                 QMainWindow.table.setItem(row,2,email)
                 QMainWindow.table.setItem(row,3,fp)
                 QMainWindow.table.setItem(row,4,trustLvl)
-
-#-------------------------------------------------------------------------------------------------------#"""
 def run():
     import time
     start_time = time.time()
     easyGPGTool = app()
     easyGPGTool.show()
     end_time = time.time()
-    compile_time = end_time - start_time
-    print("Compile time:", compile_time)
+    elapsedTime = end_time - start_time
+    print("******************Elapsed Time =>", elapsedTime,"******************")
     easyGPGTool.app.exec()
     del easyGPGTool.app
