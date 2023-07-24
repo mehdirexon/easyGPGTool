@@ -1,3 +1,5 @@
+[![status: active](https://github.com/GIScience/badges/raw/master/status/active.svg)](https://github.com/GIScience/badges#active)
+
 # 🔒 easyGPG Tool 🔒
 ## Table of Contents
 
