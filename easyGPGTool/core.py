@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import (QMainWindow,QStatusBar,QMessageBox,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication)
 from PySide6.QtCore import (Slot,Qt)
 from PySide6.QtGui import (QIcon,QKeySequence,QFont,QClipboard,QScreen)
-from datetime import datetime
 from easyGPGTool.GUI._newkey_ import newKeyForm
 from easyGPGTool.GUI._patchNote_ import patchNoteForm
 from easyGPGTool.GUI._removeKey_ import removeKeyForm
@@ -13,7 +12,6 @@ from easyGPGTool.GUI._import_ import importForm
 from easyGPGTool.GUI._trust_ import trustForm
 from easyGPGTool.GUI._passGen_ import passGenForm
 from easyGPGTool.Algorithm.GPG import GPG
-from plyer import notification
 from colorama import Fore
 from glob import glob
 import os,sys
@@ -56,6 +54,7 @@ class app(QMainWindow):
         geo.moveCenter(center)
         self.move(geo.topLeft())
     def sendLog(self,txt_or_exception,status):
+        from datetime import datetime
         print(f"{status}[LOG]",datetime.now(),txt_or_exception,f" {Fore.RESET}")
     @Slot()
     def keyGenSlot(self,data):
@@ -127,7 +126,7 @@ class app(QMainWindow):
             self.sendLog(str(ex),Fore.RED)
             result = QMessageBox.critical(self,"Exporting a key",str(ex),QMessageBox.Retry|QMessageBox.Abort)
             if result == QMessageBox.Retry:
-                self.exportKey() 
+                self.exportKey()
     @Slot()
     def importSlot(self,status):
         try:
@@ -161,6 +160,7 @@ class app(QMainWindow):
     def tableCellClicked(self,row,column):
         if column not in [2,3] :
             return
+        from plyer import notification
         data = self.table.item(row,column)
         clipboard = QClipboard()
         clipboard.setText(str(data.text()))
@@ -503,7 +503,7 @@ class menuItems():
     def __showMenuItems__(QMainWindow):
         menuItems.__configs__(QMainWindow)
         menuItems.__setStyles__(QMainWindow)
-    @staticmethod  
+    @staticmethod
     def __configs__(QMainWindow):
         QMainWindow.verLayout = QVBoxLayout()
 
@@ -534,8 +534,8 @@ class menuItems():
         QMainWindow.table.setFont(QFont("sans-serif",12))
         QMainWindow.table.setHorizontalHeaderLabels(["Type","Name","Email","Fingerprint","Trust"])
 
-        QMainWindow.table.horizontalHeader().setSectionResizeMode(4,QHeaderView.Fixed) 
-        QMainWindow.table.horizontalHeader().setSectionResizeMode(3,QHeaderView.Stretch) 
+        QMainWindow.table.horizontalHeader().setSectionResizeMode(4,QHeaderView.Fixed)
+        QMainWindow.table.horizontalHeader().setSectionResizeMode(3,QHeaderView.Stretch)
         QMainWindow.table.horizontalHeader().setSectionResizeMode(2,QHeaderView.Stretch)
         QMainWindow.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.Fixed)
         QMainWindow.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.Fixed)
@@ -544,14 +544,14 @@ class menuItems():
             type = QTableWidgetItem(str(key['type']))
             ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
             email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
-            fp = QTableWidgetItem(str(key['fingerprint']))              
+            fp = QTableWidgetItem(str(key['fingerprint']))
             trustLvl = QTableWidgetItem(str(key['trust']))
 
             type.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             ID.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             email.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             fp.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-            trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter) 
+            trustLvl.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
             QMainWindow.table.setRowCount(len(gpg.getKeys()))
 
             QMainWindow.table.setItem(row,0,type)
@@ -619,8 +619,8 @@ class menuItems():
                 type = QTableWidgetItem(str(key['type']))
                 ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
                 email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
-                fp = QTableWidgetItem(str(key['fingerprint']))                
-                trustLvl = QTableWidgetItem(str(key['trust'])) 
+                fp = QTableWidgetItem(str(key['fingerprint']))
+                trustLvl = QTableWidgetItem(str(key['trust']))
 
                 type.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                 ID.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
@@ -640,8 +640,8 @@ class menuItems():
                 type = QTableWidgetItem(str(key['type']))
                 ID = QTableWidgetItem(str(key['uids'][0].split(f"<")[0]))
                 email = QTableWidgetItem(str(key['uids'][0].split("<")[1].split(">")[0]))
-                fp = QTableWidgetItem(str(key['fingerprint']))                
-                trustLvl = QTableWidgetItem(str(key['trust'])) 
+                fp = QTableWidgetItem(str(key['fingerprint']))
+                trustLvl = QTableWidgetItem(str(key['trust']))
 
                 type.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                 ID.setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)

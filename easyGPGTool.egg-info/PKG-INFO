@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: easyGPGTool
-Version: 0.1
+Version: 0.2
 Summary: A GUI GPG tool application
 Home-page: https://github.com/MehdiREXON/easyGPGTool
 Author: Mehdi Ghazanfari
@@ -14,7 +14,7 @@ Requires-Python: >=3.10
 Description-Content-Type: text/x-rst
 License-File: LICENSE
 
-# 🔒 easyGPG 🔒
+# 🔒 easyGPG Tool 🔒
 ## Table of Contents
 
 * [Introduction](#introduction)
@@ -22,8 +22,6 @@ License-File: LICENSE
 * [Features](#features)
 
 * [Recently changes](#recently-changes)
-
-* [Requirements](#requirements)
 
 * [How to use](#how-to-use)
 
@@ -37,13 +35,13 @@ License-File: LICENSE
 
 GPG (GNU Privacy Guard) is a free and open-source tool for encrypting and signing data and communications. It uses public-key cryptography to ensure the security and privacy of your data. With GPG, you can encrypt your files and messages so that only the intended recipient can read them, and you can also digitally sign your messages to prove their authenticity.
 
-+ what is easyGPG
++ what is easyGPG Tool
 
-easyGPG is a tool that allows you to work with GPG easily instead of using the original library. With two different versions available, you can choose the one that best fits your needs.
+easyGPG Tool is a tool that allows you to work with GPG easily instead of using the original library.
 This GUI version helps you to get rid of typing codes and other stuff. So you can easily do whatever just with forms. 🎉
 
 ## Features💡
-Why use easyGPG? 💻 
+Why use easyGPG Tool? 💻 
 
 easyGPG makes it easy for anyone to use GPG for encryption and decryption without having to learn complex command-line codes. With its user-friendly interface, you can quickly and easily manage your keys and perform common tasks such as:
 
@@ -62,52 +60,58 @@ easyGPG makes it easy for anyone to use GPG for encryption and decryption withou
 🔍 Easily viewing all your keys in one place with our show keys feature
 
 ## Recently changes🆕
-
-+ some bugs were fixed
-
-## Requirements📦
-Before running the application, make sure to install all required libraries by following the instructions in the Requirements.txt file included in the project.
++ easyGPGTool has been added to pypi 
++ new run method has been added
 
 ## How to use📖
-After installing the required packages, make sure to compile the project in order to start using GPG-GUI.
+After using ```pip3 install easyGPGTool``` ,create a python file and follow these code:
+
+```
+from easyGPGTool.core import run
+run()
+```
+
+# Note:
+
+In the new version, installing on a local machine is being developed.
 
 ## Installation🛠️
 ### For Debian 
 ```
 sudo apt update && sudo apt upgrade 
 sudo apt install python3 && sudo apt install python3-pip 
-pip3 install easyGPG
+pip3 install easyGPGTool
 ```
 ### For Fedora
 ```
 sudo dnf update && sudo dnf upgrade 
 sudo dnf install python3 && sudo dnf install python3-pip 
-pip3 install easyGPG
+pip3 install easyGPGTool
 ```
 ### For Arch
 ```
 sudo pacman -Syu
 sudo pacman -S python python-pip
-pip3 install easyGPG
+pip3 install easyGPGTool
 ```
 ### For MacOS
 ```
 xcode-select --install
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 brew install python3
-pip3 install easyGPG
+pip3 install easyGPGTool
 ```
 ### CentOS/RHEL
 ```
 sudo yum update
 sudo yum install python3 python3-pip
-pip3 install easyGPG
+pip3 install easyGPGTool
 ```
 ### Gentoo
 ```
 sudo emerge --sync && sudo emerge --update world 
 sudo emerge --ask dev-lang/python dev-python/pip 
-pip3 install easyGPG
+pip3 install easyGPGTool
 ```
 ### Slackware
 ```
@@ -115,7 +119,7 @@ slackpkg update && slackpkg upgrade-all
 slackpkg install python 
 python -m ensurepip 
 pip install --upgrade pip setuptools wheel 
-pip install easyGPG
+pip install easyGPGTool
 ```
 ## Acknowledgements🙏
 This README.md file was improved with the assistance of Bing. 😊
