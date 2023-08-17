@@ -16,7 +16,7 @@ class passGenForm(QWidget):
         # it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
 
-        self.paswrodLVLLabel = QLabel("Select your password difficulty : ")
+        self.passwordLVLLabel = QLabel("Select your password difficulty : ")
 
         self.difficultySlider = QSlider(Qt.Horizontal, self)
         self.difficultySlider.setToolTip(
@@ -36,7 +36,7 @@ class passGenForm(QWidget):
         self.closeButton.clicked.connect(self.closeClicked)
 
         V_layout = QVBoxLayout()
-        V_layout.addWidget(self.paswrodLVLLabel)
+        V_layout.addWidget(self.passwordLVLLabel)
         V_layout.addWidget(self.difficultySlider)
         V_layout.addWidget(self.informationLabel)
         # V_layout.addWidget(self.saveCheckBox)
