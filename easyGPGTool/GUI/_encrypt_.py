@@ -1,24 +1,27 @@
-from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox,QApplication
-from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QLabel, QVBoxLayout, QCheckBox, QApplication
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QScreen
+
+
 class encryptForm(QWidget):
     signal = Signal(bool)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Encrypting a file")
         self.setFixedHeight(130)
         self.setFixedWidth(300)
-        #it locks parent form when child is active
+        # it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
 
         self.emailLabel = QLabel("Email : ")
-        self.emailLineEdit= QLineEdit()
+        self.emailLineEdit = QLineEdit()
         self.emailLineEdit.textEdited.connect(self.textEdited)
 
         self.signCB = QCheckBox("Sign")
         self.signCB.stateChanged.connect(self.signCBChanged)
 
-        #passphrase
+        # passphrase
         self.passphraseLabel = QLabel("Passphrase : ")
         self.passphraseLabel.setHidden(True)
         self.passphraseLineEdit = QLineEdit()
@@ -36,9 +39,9 @@ class encryptForm(QWidget):
         self.encryptButton.setDisabled(True)
         self.encryptButton.clicked.connect(self.encryptClicked)
 
-        #layouts
+        # layouts
         V_layout = QVBoxLayout()
-        V_layout.addWidget(self.emailLabel,alignment= Qt.AlignTop)
+        V_layout.addWidget(self.emailLabel, alignment=Qt.AlignTop)
         V_layout.addWidget(self.emailLineEdit)
         V_layout.addWidget(self.signCB)
         V_layout.addWidget(self.passphraseLabel)
@@ -46,15 +49,17 @@ class encryptForm(QWidget):
         V_layout.addWidget(self.fingerprintLabel)
         V_layout.addWidget(self.fingerprintLineEdit)
         V_layout.addStretch()
-        V_layout.addWidget(self.encryptButton,alignment= Qt.AlignCenter)
+        V_layout.addWidget(self.encryptButton, alignment=Qt.AlignCenter)
 
         self.setLayout(V_layout)
+
     def showEvent(self, event):
         super().showEvent(event)
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
+
     def signCBChanged(self):
         if self.signCB.isChecked():
             self.encryptButton.setDisabled(True)
@@ -63,7 +68,7 @@ class encryptForm(QWidget):
             self.passphraseLineEdit.setHidden(False)
             self.fingerprintLabel.setHidden(False)
             self.fingerprintLineEdit.setHidden(False)
-        else:       
+        else:
             if self.emailLineEdit.text() != "":
                 self.encryptButton.setEnabled(True)
             else:
@@ -78,24 +83,25 @@ class encryptForm(QWidget):
 
     def textEdited(self):
         if not self.signCB.isChecked():
-            if self.emailLineEdit.text() == "":                
+            if self.emailLineEdit.text() == "":
                 self.encryptButton.setDisabled(True)
                 return
             else:
                 self.encryptButton.setDisabled(False)
                 return
         else:
-            if self.emailLineEdit.text() == "": 
+            if self.emailLineEdit.text() == "":
                 self.encryptButton.setDisabled(True)
                 return
-            if self.passphraseLineEdit.text() == "": 
+            if self.passphraseLineEdit.text() == "":
                 self.encryptButton.setDisabled(True)
                 return
-            if self.fingerprintLineEdit.text() == "": 
+            if self.fingerprintLineEdit.text() == "":
                 self.encryptButton.setDisabled(True)
                 return
             else:
                 self.encryptButton.setDisabled(False)
+
     @Slot()
     def encryptClicked(self):
         self.signal.emit(True)

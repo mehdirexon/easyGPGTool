@@ -1,18 +1,21 @@
-from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox,QApplication
-from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QScreen
+from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QLabel, QVBoxLayout, QCheckBox, QApplication
+
+
 class removeKeyForm(QWidget):
     signal = Signal(bool)
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Removing a new key")
         self.setFixedHeight(130)
         self.setFixedWidth(300)
-        #it locks parent form when child is active
+        # it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
 
         self.fingerprintLabel = QLabel("Fingerprint : ")
-        self.fingerprintLineEdit= QLineEdit()
+        self.fingerprintLineEdit = QLineEdit()
         self.fingerprintLineEdit.textEdited.connect(self.textEdited)
 
         self.passphraseLabel = QLabel("Passphrase : ")
@@ -29,7 +32,7 @@ class removeKeyForm(QWidget):
         self.removeButton.setDisabled(True)
         self.removeButton.clicked.connect(self.removeClicked)
 
-        #layouts
+        # layouts
         V_layout = QVBoxLayout()
         V_layout.addWidget(self.fingerprintLabel)
         V_layout.addWidget(self.fingerprintLineEdit)
@@ -37,7 +40,7 @@ class removeKeyForm(QWidget):
         V_layout.addWidget(self.passphraseLabel)
         V_layout.addWidget(self.passphraseLineEdit)
         V_layout.addStretch()
-        V_layout.addWidget(self.removeButton, alignment= Qt.AlignCenter)
+        V_layout.addWidget(self.removeButton, alignment=Qt.AlignCenter)
 
         self.setLayout(V_layout)
 
@@ -47,6 +50,7 @@ class removeKeyForm(QWidget):
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
+
     def privateKeyCBChanged(self):
         if self.privateKeyCB.isChecked():
             self.removeButton.setDisabled(True)
@@ -62,17 +66,19 @@ class removeKeyForm(QWidget):
             self.passphraseLineEdit.clear()
             self.passphraseLabel.setHidden(True)
             self.passphraseLineEdit.setHidden(True)
+
     def textEdited(self):
         if not self.privateKeyCB.isChecked():
-            if self.fingerprintLineEdit.text() == "":                
+            if self.fingerprintLineEdit.text() == "":
                 self.removeButton.setDisabled(True)
             else:
                 self.removeButton.setDisabled(False)
         else:
-            if self.fingerprintLineEdit.text() == "" or self.passphraseLineEdit.text() == "": 
+            if self.fingerprintLineEdit.text() == "" or self.passphraseLineEdit.text() == "":
                 self.removeButton.setDisabled(True)
             else:
                 self.removeButton.setDisabled(False)
+
     @Slot()
     def removeClicked(self):
         if self.privateKeyCB.isChecked():

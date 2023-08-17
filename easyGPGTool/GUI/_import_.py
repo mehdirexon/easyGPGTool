@@ -1,7 +1,10 @@
-from PySide6.QtWidgets import QWidget,QLineEdit,QPushButton,QLabel,QVBoxLayout,QCheckBox,QFileDialog,QHBoxLayout,QApplication
-from PySide6.QtCore import Qt,Signal,Slot
+from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QLabel, QVBoxLayout, QCheckBox, QFileDialog, QHBoxLayout, \
+    QApplication
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QScreen
 import os
+
+
 class importForm(QWidget):
     signal = Signal(bool)
 
@@ -10,12 +13,12 @@ class importForm(QWidget):
         self.setWindowTitle("Importing a key")
         self.setFixedHeight(135)
         self.setFixedWidth(400)
-        #it locks parent form when child is active
+        # it locks parent form when child is active
         self.setWindowModality(Qt.ApplicationModal)
 
         self.keyPathLabel = QLabel("Public key file path : ")
 
-        self.keyPathLineEdit= QLineEdit()
+        self.keyPathLineEdit = QLineEdit()
         self.keyPathLineEdit.setReadOnly(True)
         self.keyPathLineEdit.textEdited.connect(self.textEdited)
 
@@ -28,21 +31,21 @@ class importForm(QWidget):
         self.passphraseLineEdit.setHidden(True)
         self.passphraseLineEdit.setEchoMode(QLineEdit.EchoMode.Password)
         self.passphraseLineEdit.textEdited.connect(self.textEdited)
-        
-        #check_box
+
+        # check_box
         self.privateKeyCB = QCheckBox("Private key")
         self.privateKeyCB.stateChanged.connect(self.privateKeyCBChanged)
 
-        #import_button
+        # import_button
         self.importButton = QPushButton("Import")
         self.importButton.setDisabled(True)
         self.importButton.clicked.connect(self.importClicked)
-#-------------------------------------------------------------------------------------------------------#
-        #layouts
+        # -------------------------------------------------------------------------------------------------------#
+        # layouts
         V_layout = QVBoxLayout()
         H_layout = QHBoxLayout()
 
-        V_layout.addWidget(self.keyPathLabel,alignment= Qt.AlignTop)
+        V_layout.addWidget(self.keyPathLabel, alignment=Qt.AlignTop)
 
         H_layout.addWidget(self.keyPathLineEdit)
         H_layout.addWidget(self.openDialog)
@@ -53,33 +56,38 @@ class importForm(QWidget):
         V_layout.addWidget(self.passphraseLineEdit)
         V_layout.addWidget(self.privateKeyCB)
         V_layout.addStretch()
-        V_layout.addWidget(self.importButton, alignment= Qt.AlignCenter)
+        V_layout.addWidget(self.importButton, alignment=Qt.AlignCenter)
 
         self.setLayout(V_layout)
+
     def showEvent(self, event):
         super().showEvent(event)
         center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
+
     def textEdited(self):
         if not self.privateKeyCB.isChecked():
-            if self.keyPathLineEdit.text() == "":                
+            if self.keyPathLineEdit.text() == "":
                 self.importButton.setDisabled(True)
             else:
                 self.importButton.setDisabled(False)
         else:
-            if self.keyPathLineEdit.text() == "" or self.passphraseLineEdit.text() == "": 
+            if self.keyPathLineEdit.text() == "" or self.passphraseLineEdit.text() == "":
                 self.importButton.setDisabled(True)
             else:
                 self.importButton.setDisabled(False)
+
     def openDialogClicked(self):
-        selectedPath = QFileDialog.getOpenFileName(self,"Select your file","/home/" + os.getlogin() + "/Desktop",filter="*.asc")
+        selectedPath = QFileDialog.getOpenFileName(self, "Select your file", "/home/" + os.getlogin() + "/Desktop",
+                                                   filter="*.asc")
         self.keyPathLineEdit.setText(selectedPath[0])
         if not self.privateKeyCB.isChecked():
             self.importButton.setEnabled(True)
         else:
             self.importButton.setEnabled(False)
+
     def privateKeyCBChanged(self):
         if self.privateKeyCB.isChecked():
             self.importButton.setDisabled(True)
@@ -97,6 +105,7 @@ class importForm(QWidget):
             self.setFixedHeight(130)
             self.passphraseLabel.setHidden(True)
             self.passphraseLineEdit.setHidden(True)
+
     @Slot()
     def importClicked(self):
         if self.privateKeyCB.isChecked():
