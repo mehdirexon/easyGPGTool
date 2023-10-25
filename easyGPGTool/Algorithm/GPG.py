@@ -1,12 +1,15 @@
 import gnupg, os
 from colorama import Fore
-
+from sys import platform
 
 class GPG:
     def __init__(self):
         super().__init__()
         os.environ["GPG_AGENT_INFO"] = ""
-        self.gpg = gnupg.GPG(gnupghome='/home/' + os.getlogin() + '/.gnupg')
+        if platform == "darwin": #MacOS
+            self.gpg = gnupg.GPG(gnupghome='/Users/' + os.getenv("USER") + '/.gnupg')
+        elif platform == "linux" or platform == "linux2": #Linux
+            self.gpg = gnupg.GPG(gnupghome='/home/' + os.getenv("USER") + '/.gnupg')
         self.gpg.encoding = 'utf-8'
 
     def getKeys(self, secret: bool = False):

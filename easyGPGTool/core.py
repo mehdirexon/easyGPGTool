@@ -21,9 +21,9 @@ appPath = os.path.normpath(__file__ + os.sep + os.pardir)
 class app(QMainWindow):
     __information__ = {"version" : "0.2beta","author" : "Mehdi Ghazanfari","author_email" : "mehdirexon@gmail.com"}
     def __init__(self):
-        #basics
         self.app = QApplication(sys.argv)
         super().__init__()
+
         #forms
         self.newKeyForm = None
         self.removeKeyForm = None
@@ -37,7 +37,7 @@ class app(QMainWindow):
         self.passGenForm = None
 
         #basic configs
-        self.setWindowTitle("easyGPG tool")
+        self.setWindowTitle("EasyGPG Tool")
         self.setMinimumHeight(600)
         self.setMinimumWidth(1000)
         self.setWindowIcon(QIcon(appPath+"/images/logo.png"))
@@ -415,7 +415,7 @@ class app(QMainWindow):
                     self.passGen()
 class topBarMenu():
     @staticmethod
-    def __showTopBarItems__(QMainWindow):
+    def __showTopBarItems__(QMainWindow : QMainWindow):
         QMainWindow.menuBar = QMainWindow.menuBar()
         topBarMenu.__keyMenu__(QMainWindow)
         topBarMenu.__dataProtectionMenu__(QMainWindow)
@@ -423,7 +423,7 @@ class topBarMenu():
         topBarMenu.__password__(QMainWindow)
         topBarMenu.__helpMenu__(QMainWindow)
     @staticmethod
-    def __keyMenu__(QMainWindow):
+    def __keyMenu__(QMainWindow : QMainWindow):
         QMainWindow.keyMenu = QMainWindow.menuBar.addMenu("Key")
         #1
         newKey = QMainWindow.keyMenu.addAction("New key")
@@ -560,55 +560,51 @@ class menuItems():
             QMainWindow.table.setItem(row,3,fp)
             QMainWindow.table.setItem(row,4,trustLvl)
     @staticmethod
-    def __setStyles__(QMainWindow):
+    def __setStyles__(QMainWindow : QMainWindow):
         QMainWindow.table.setStyleSheet("""
-        QTableWidget 
-        {
-            color: black;
-            font-family: "Helvetica Neue", sans-serif; /* Changes the font */
-            font-size: 12px;
-            vertical-align: center;
-            margin-top: 35px;
-            border-collapse: collapse;
-            border-radius: 0px 0px 6px 6px !important; /* Curves only the bottom corners */
-            min-width: 400px;
-            margin-left: 10px;
-            margin-right: 10px;
-            margin-bottom: 25px;
-            alternate-background-color: #f2f2f2; /* Adds alternating row colors */
-            background-color: #e6e6e6; /* Lighter gray */
-        }
+        QTableWidget {
+        color: black;
+        font-family: "Helvetica Neue", sans-serif;
+        font-size: 12px;
+        vertical-align: center;
+        margin-top: 35px;
+        border: 2px solid #1a75ff;
+        border-radius: 10px;
+        min-width: 400px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 25px;
+        alternate-background-color: #f2f2f2;
+        background-color: #e6e6e6;
+    }
 
-        QHeaderView::section 
-        {
-            background-color: #1a75ff; /* Blue */
-            border-bottom: thin solid #0059b3; /* Darker blue */
-            font-family: "Helvetica Neue", sans-serif; /* Changes the font */    
-            border: none;
-            height: 22px;
-        }
+    QHeaderView::section {
+        background-color: #1a75ff;
+        border-bottom: thin solid #0059b3;
+        font-family: "Helvetica Neue", sans-serif;
+        border: none;
+        height: 22px;
+    }
 
-        QTableWidget::item 
-        {
-            padding: 5px; /* Adds padding to table cells */
-        }
+    QTableWidget::item {
+        padding: 5px;
+    }
 
-        QTableWidget::item:selected 
-        {
-            background-color: #b3d9ff; /* Light blue */
-        }
+    QTableWidget::item:selected {
+        background-color: #a6a39d;
+    }
 
-        /* Adds a subtle hover effect to table cells */
-        QTableWidget::item:hover 
-        {
-            background-color: #f2f2f2;
-        }
+    QTableWidget::item:hover {
+        background-color: #d9edf7; /* Lighter blue for better visibility */
+        border: 1px solid #1a75ff;
+        //border-radius: 5px;
+    }
 
-        /* Adds a hover effect to the table header */
-        QHeaderView::section:hover 
-        {
-            background-color: #3399ff; /* Lighter blue */
-        }
+    QHeaderView::section:hover {
+        background-color: #3399ff;
+        border: 1px solid #0059b3;
+        border-radius: 5px;
+    }
         """)
     @staticmethod
     def __Load__(QMainWindow):

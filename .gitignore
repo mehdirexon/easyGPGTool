@@ -1,3 +1,6 @@
 __pycache__/
-.idea
 test.py
+venv/
+.vscode/
+easyGPGTool.egg-info/
+easyGPGTool.log
