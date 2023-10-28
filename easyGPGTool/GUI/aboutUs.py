@@ -12,9 +12,11 @@ class AboutUsGUI(QWidget):
         self.setFixedWidth(250)
         self.setWindowModality(Qt.ApplicationModal)
 
-        self.versionLabel = QLabel()
-        self.authorLabel = QLabel()
-        self.emailLabel = QLabel()
+        self.versionLabel = QLabel("Vesion : 0.2beta")
+        self.authorLabel = QLabel("Author : Mehdi Ghazanfari")
+        self.emailLabel = QLabel("Email : me@mehdirexon.ir")
+        
+        
         self.closeButton = QPushButton("Close")
         self.closeButton.clicked.connect(self.closeButtonClicked)
 
@@ -34,11 +36,6 @@ class AboutUsGUI(QWidget):
         geo = self.frameGeometry()
         geo.moveCenter(center)
         self.move(geo.topLeft())
-
-    def getInformation(self, data):
-        self.versionLabel.setText("Version : " + data["version"])
-        self.authorLabel.setText("Author : " + data["author"])
-        self.emailLabel.setText("Email : " + data["author_email"])
 
     def closeButtonClicked(self):
         self.close()

@@ -54,7 +54,7 @@ class newGPG(gnupg.GPG):
 
         return key
 
-    def removeKey(self, **kwargs) -> tuple(bool,str):
+    def removeKey(self, **kwargs) -> tuple:
         ## Removing Private Key First
         result = self.delete_keys(
             fingerprints=kwargs.get("fingerprint", ""),
