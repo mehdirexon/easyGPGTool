@@ -11,7 +11,7 @@ from easyGPGTool.GUI._export_ import exportForm
 from easyGPGTool.GUI._import_ import importForm
 from easyGPGTool.GUI._trust_ import trustForm
 from easyGPGTool.GUI._passGen_ import passGenForm
-from easyGPGTool.Algorithm.GPG import GPG
+from easyGPGTool.Algorithm.GPG import easyGPG as GPG
 from colorama import Fore
 from glob import glob
 import os,sys
