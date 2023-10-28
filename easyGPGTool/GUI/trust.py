@@ -3,7 +3,7 @@ from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QPushButton, QLabel, QVBoxLayout, QComboBox, QHBoxLayout, QDial, QApplication
 
 
-class trustForm(QWidget):
+class TrustGUI(QWidget):
     signal = Signal(str)
 
     def __init__(self):

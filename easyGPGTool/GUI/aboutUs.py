@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QScreen
 
 
-class aboutUsForm(QWidget):
+class AboutUsGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("About us")

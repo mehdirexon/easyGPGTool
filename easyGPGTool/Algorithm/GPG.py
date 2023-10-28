@@ -180,7 +180,7 @@ class easyGPG:
 
     def decrypt(self, passphrase):
         from PySide6.QtWidgets import QFileDialog, QMessageBox
-        from easyGPGTool.GUI._extensions_ import Ext
+        from easyGPGTool.Assets.extensions import Ext
         import magic
 
         fileExtension = "log"

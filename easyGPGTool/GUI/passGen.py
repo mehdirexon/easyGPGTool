@@ -6,7 +6,7 @@ from passlib import pwd
 from plyer import notification
 
 
-class passGenForm(QWidget):
+class PassGenGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Password Generator")

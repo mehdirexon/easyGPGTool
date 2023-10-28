@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QScreen
 
 
-class decryptForm(QWidget):
+class DecryptGUI(QWidget):
     signal = Signal(bool)
 
     def __init__(self):

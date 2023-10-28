@@ -1,16 +1,16 @@
 from PySide6.QtWidgets import (QMainWindow,QStatusBar,QMessageBox,QTableWidget,QAbstractItemView,QTableWidgetItem,QWidget,QCheckBox,QHeaderView,QVBoxLayout,QApplication)
 from PySide6.QtCore import (Slot,Qt)
 from PySide6.QtGui import (QIcon,QKeySequence,QFont,QClipboard,QScreen)
-from easyGPGTool.GUI._newkey_ import newKeyForm
-from easyGPGTool.GUI._patchNote_ import patchNoteForm
-from easyGPGTool.GUI._removeKey_ import removeKeyForm
-from easyGPGTool.GUI._aboutUs_ import aboutUsForm
-from easyGPGTool.GUI._encrypt_ import encryptForm
-from easyGPGTool.GUI._decrypt_ import decryptForm
-from easyGPGTool.GUI._export_ import exportForm
-from easyGPGTool.GUI._import_ import importForm
-from easyGPGTool.GUI._trust_ import trustForm
-from easyGPGTool.GUI._passGen_ import passGenForm
+from easyGPGTool.GUI.newkey import NewKeyGUI
+from easyGPGTool.GUI.patchNote import PatchNoteGUI
+from easyGPGTool.GUI.removeKey import RemoveKeyGUI
+from easyGPGTool.GUI.aboutUs import AboutUsGUI
+from easyGPGTool.GUI.encrypt import EncryptGUI
+from easyGPGTool.GUI.decrypt import DecryptGUI
+from easyGPGTool.GUI.exportKey import ExportGUI
+from easyGPGTool.GUI.importKey import ImportGUI
+from easyGPGTool.GUI.trust import TrustGUI
+from easyGPGTool.GUI.passGen import PassGenGUI
 from easyGPGTool.Algorithm.GPG import easyGPG as GPG
 from colorama import Fore
 from glob import glob
@@ -25,16 +25,16 @@ class app(QMainWindow):
         super().__init__()
 
         #forms
-        self.newKeyForm = None
-        self.removeKeyForm = None
-        self.aboutUsForm = None
-        self.patchNoteForm = None
-        self.encryptForm = None
-        self.decryptForm = None
-        self.exportForm = None
-        self.importForm = None
-        self.trustForm = None
-        self.passGenForm = None
+        self.NewKeyGUI = None
+        self.RemoveKeyGUI = None
+        self.AboutUsGUI = None
+        self.PatchNoteGUI = None
+        self.EncryptGUI = None
+        self.DecryptGUI = None
+        self.ExportGUI = None
+        self.ImportGUI = None
+        self.TrustGUI = None
+        self.PassGenGUI = None
 
         #basic configs
         self.setWindowTitle("EasyGPG Tool")
@@ -87,7 +87,7 @@ class app(QMainWindow):
         if status is True:
             try:
                 self.sendLog("Encryption signal has been recived",Fore.GREEN)
-                status = gpg.encrypt(self.encryptForm.emailLineEdit.text())
+                status = gpg.encrypt(self.EncryptGUI.emailLineEdit.text())
                 if status.ok is True:
                     QMessageBox.information(self,"Encrypting a file",str(status.stderr) + "\n"+ str(status.status),QMessageBox.Ok)
                     self.sendLog("An encryption task has been successfully done",Fore.GREEN)
@@ -102,7 +102,7 @@ class app(QMainWindow):
     def decryptionSlot(self,status):
         if status is True:
             try:
-                status = gpg.decrypt(passphrase=self.decryptForm.passphraseLineEdit.text())
+                status = gpg.decrypt(passphrase=self.DecryptGUI.passphraseLineEdit.text())
                 if status.ok is True:
                     QMessageBox.information(self,"Decrypting a file",str(status.stderr) + "\n"+ str(status.status) +"\n"+ str(status.valid) +"\n"+ str(status.trust_text),QMessageBox.Ok)
                     self.sendLog("A decryption task has been successfully done",Fore.GREEN)
@@ -174,11 +174,11 @@ class app(QMainWindow):
 
 #-------------------------------------------------------------------------------------------------------#
     def removeKey(self):
-        if self.removeKeyForm is None:
+        if self.RemoveKeyGUI is None:
             try:
-                self.removeKeyForm = removeKeyForm()
-                self.removeKeyForm.show()
-                self.removeKeyForm.signal.connect(self.keyDelSlot)
+                self.RemoveKeyGUI = RemoveKeyGUI()
+                self.RemoveKeyGUI.show()
+                self.RemoveKeyGUI.signal.connect(self.keyDelSlot)
                 self.sendLog("Delete key form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -187,10 +187,10 @@ class app(QMainWindow):
                     self.removeKey()
         else:
             try:
-                self.removeKeyForm.close()
-                self.removeKeyForm = removeKeyForm()
-                self.removeKeyForm.show()
-                self.removeKeyForm.signal.connect(self.keyDelSlot)
+                self.RemoveKeyGUI.close()
+                self.RemoveKeyGUI = RemoveKeyGUI()
+                self.RemoveKeyGUI.show()
+                self.RemoveKeyGUI.signal.connect(self.keyDelSlot)
                 self.sendLog("Previous delete key form destroyed and again been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -198,11 +198,11 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.removeKey()
     def newKey(self):
-        if self.newKeyForm is None:
+        if self.NewKeyGUI is None:
             try:
-                self.newKeyForm = newKeyForm()
-                self.newKeyForm.show()
-                self.newKeyForm.signal.connect(self.keyGenSlot)
+                self.NewKeyGUI = NewKeyGUI()
+                self.NewKeyGUI.show()
+                self.NewKeyGUI.signal.connect(self.keyGenSlot)
                 self.sendLog("New key widget has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -211,10 +211,10 @@ class app(QMainWindow):
                     self.newKey()
         else:
             try:
-                self.newKeyForm.close()
-                self.newKeyForm = newKeyForm()
-                self.newKeyForm.show()
-                self.newKeyForm.signal.connect(self.keyGenSlot)
+                self.NewKeyGUI.close()
+                self.NewKeyGUI = NewKeyGUI()
+                self.NewKeyGUI.show()
+                self.NewKeyGUI.signal.connect(self.keyGenSlot)
                 self.sendLog("previoyus new key widget destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -222,11 +222,11 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.newKey()
     def aboutUs(self):
-        if self.aboutUsForm is None:
+        if self.AboutUsGUI is None:
             try:
-                self.aboutUsForm = aboutUsForm()
-                self.aboutUsForm.show()
-                self.aboutUsForm.getInformation(self.__information__)
+                self.AboutUsGUI = AboutUsGUI()
+                self.AboutUsGUI.show()
+                self.AboutUsGUI.getInformation(self.__information__)
                 self.sendLog("About us form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -235,10 +235,10 @@ class app(QMainWindow):
                     self.aboutUs()
         else:
             try:
-                self.aboutUsForm.close()
-                self.aboutUsForm = aboutUsForm()
-                self.aboutUsForm.show()
-                self.aboutUsForm.getInformation(self.__information__)
+                self.AboutUsGUI.close()
+                self.AboutUsGUI = AboutUsGUI()
+                self.AboutUsGUI.show()
+                self.AboutUsGUI.getInformation(self.__information__)
                 self.sendLog("Previous about us form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -246,10 +246,10 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.aboutUs()
     def patchNote(self):
-        if self.patchNoteForm is None:
+        if self.PatchNoteGUI is None:
             try:
-                self.patchNoteForm = patchNoteForm()
-                self.patchNoteForm.show()
+                self.PatchNoteGUI = PatchNoteGUI()
+                self.PatchNoteGUI.show()
                 self.sendLog("Patch note form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -258,9 +258,9 @@ class app(QMainWindow):
                     self.patchNote()
         else:
             try:
-                self.patchNoteForm.close()
-                self.patchNoteForm = patchNoteForm()
-                self.patchNoteForm.show()
+                self.PatchNoteGUI.close()
+                self.PatchNoteGUI = PatchNoteGUI()
+                self.PatchNoteGUI.show()
                 self.sendLog("Previous patch note form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -268,11 +268,11 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.patchNote()
     def encrypt(self):
-        if self.encryptForm is None:
+        if self.EncryptGUI is None:
             try:
-                self.encryptForm = encryptForm()
-                self.encryptForm.show()
-                self.encryptForm.signal.connect(self.encryptionSlot)
+                self.EncryptGUI = EncryptGUI()
+                self.EncryptGUI.show()
+                self.EncryptGUI.signal.connect(self.encryptionSlot)
                 self.sendLog("Encrypt form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -281,10 +281,10 @@ class app(QMainWindow):
                     self.encrypt()
         else:
             try:
-                self.encryptForm.close()
-                self.encryptForm = encryptForm()
-                self.encryptForm.show()
-                self.encryptForm.signal.connect(self.encryptionSlot)
+                self.EncryptGUI.close()
+                self.EncryptGUI = EncryptGUI()
+                self.EncryptGUI.show()
+                self.EncryptGUI.signal.connect(self.encryptionSlot)
                 self.sendLog("Previous encrypt form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -292,11 +292,11 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.encrypt()
     def decrypt(self):
-        if self.decryptForm is None:
+        if self.DecryptGUI is None:
             try:
-                self.decryptForm = decryptForm()
-                self.decryptForm.signal.connect(self.decryptionSlot)
-                self.decryptForm.show()
+                self.DecryptGUI = DecryptGUI()
+                self.DecryptGUI.signal.connect(self.decryptionSlot)
+                self.DecryptGUI.show()
                 self.sendLog("Decrypt form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -305,10 +305,10 @@ class app(QMainWindow):
                     self.decrypt()
         else:
             try:
-                self.decryptForm.close()
-                self.decryptForm = decryptForm()
-                self.decryptForm.show()
-                self.decryptForm.signal.connect(self.decryptionSlot)
+                self.DecryptGUI.close()
+                self.DecryptGUI = DecryptGUI()
+                self.DecryptGUI.show()
+                self.DecryptGUI.signal.connect(self.decryptionSlot)
                 self.sendLog("Previous decrypt form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -316,11 +316,11 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.decrypt()
     def exportKey(self):
-        if self.exportForm is None:
+        if self.ExportGUI is None:
             try:
-                self.exportForm = exportForm()
-                self.exportForm.show()
-                self.exportForm.signal.connect(self.exportSlot)
+                self.ExportGUI = ExportGUI()
+                self.ExportGUI.show()
+                self.ExportGUI.signal.connect(self.exportSlot)
                 self.sendLog("Export form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -329,10 +329,10 @@ class app(QMainWindow):
                     self.exportKey()
         else:
             try:
-                self.exportForm.close()
-                self.exportForm = exportForm()
-                self.exportForm.show()
-                self.exportForm.signal.connect(self.exportSlot)
+                self.ExportGUI.close()
+                self.ExportGUI = ExportGUI()
+                self.ExportGUI.show()
+                self.ExportGUI.signal.connect(self.exportSlot)
                 self.sendLog("Previous export form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -340,11 +340,11 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.exportKey()
     def importKey(self):
-        if self.importForm is None:
+        if self.ImportGUI is None:
             try:
-                self.importForm = importForm()
-                self.importForm.show()
-                self.importForm.signal.connect(self.importSlot)
+                self.ImportGUI = ImportGUI()
+                self.ImportGUI.show()
+                self.ImportGUI.signal.connect(self.importSlot)
                 self.sendLog("Import form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -353,10 +353,10 @@ class app(QMainWindow):
                     self.importKey()
         else:
             try:
-                self.importForm.close()
-                self.importForm = importForm()
-                self.importForm.show()
-                self.importForm.signal.connect(self.importSlot)
+                self.ImportGUI.close()
+                self.ImportGUI = ImportGUI()
+                self.ImportGUI.show()
+                self.ImportGUI.signal.connect(self.importSlot)
                 self.sendLog("Previous import form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -364,12 +364,12 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.importKey()
     def trust(self):
-        if self.trustForm is None:
+        if self.TrustGUI is None:
             try:
-                self.trustForm = trustForm()
-                self.trustForm.show()
-                self.trustForm.getFingerprints(gpg.getKeys())
-                self.trustForm.signal.connect(self.trustLevelSlot)
+                self.TrustGUI = TrustGUI()
+                self.TrustGUI.show()
+                self.TrustGUI.getFingerprints(gpg.getKeys())
+                self.TrustGUI.signal.connect(self.trustLevelSlot)
                 self.sendLog("Trust form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -378,11 +378,11 @@ class app(QMainWindow):
                     self.trust()
         else:
             try:
-                self.trustForm.close()
-                self.trustForm = trustForm()
-                self.trustForm.show()
-                self.trustForm.getFingerprints(gpg.getKeys())
-                self.trustForm.signal.connect(self.trustLevelSlot)
+                self.TrustGUI.close()
+                self.TrustGUI = TrustGUI()
+                self.TrustGUI.show()
+                self.TrustGUI.getFingerprints(gpg.getKeys())
+                self.TrustGUI.signal.connect(self.trustLevelSlot)
                 self.sendLog("Previous trust form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -390,11 +390,11 @@ class app(QMainWindow):
                 if result == QMessageBox.Retry:
                     self.trust()
     def passGen(self):
-        if self.passGenForm is None:
+        if self.PassGenGUI is None:
             try:
-                self.passGenForm = passGenForm()
-                self.passGenForm.show()
-                #self.passGenForm.signal.connect(self.passDifficultySlot)
+                self.PassGenGUI = PassGenGUI()
+                self.PassGenGUI.show()
+                #self.PassGenGUI.signal.connect(self.passDifficultySlot)
                 self.sendLog("pass generator form has been called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)
@@ -403,10 +403,10 @@ class app(QMainWindow):
                     self.passGen()
         else:
             try:
-                self.passGenForm.close()
-                self.passGenForm = passGenForm()
-                self.passGenForm.show()
-                #self.passGenForm.signal.connect(self.passDifficultySlot)
+                self.PassGenGUI.close()
+                self.PassGenGUI = PassGenGUI()
+                self.PassGenGUI.show()
+                #self.PassGenGUI.signal.connect(self.passDifficultySlot)
                 self.sendLog("previous password generator form destoryed and again called",Fore.GREEN)
             except Exception as ex:
                 self.sendLog(str(ex),Fore.RED)

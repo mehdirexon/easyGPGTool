@@ -4,7 +4,7 @@ from PySide6.QtGui import QScreen
 import re
 
 
-class newKeyForm(QWidget):
+class NewKeyGUI(QWidget):
     signal = Signal(dict)
 
     def __init__(self):

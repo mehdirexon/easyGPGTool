@@ -5,7 +5,7 @@ from PySide6.QtGui import QScreen
 import os
 
 
-class importForm(QWidget):
+class ImportGUI(QWidget):
     signal = Signal(bool)
 
     def __init__(self):

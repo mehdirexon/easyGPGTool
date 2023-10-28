@@ -4,7 +4,7 @@ from PySide6.QtGui import QScreen
 import os
 
 
-class patchNoteForm(QWidget):
+class PatchNoteGUI(QWidget):
 
     def __init__(self):
         super().__init__()

@@ -3,7 +3,7 @@ from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QWidget, QLineEdit, QPushButton, QLabel, QVBoxLayout, QCheckBox, QApplication
 
 
-class removeKeyForm(QWidget):
+class RemoveKeyGUI(QWidget):
     signal = Signal(bool)
 
     def __init__(self):
