@@ -1,0 +1,5 @@
+test.py
+venv/
+easyGPGTool.egg-info/
+dist/
+.vscode/

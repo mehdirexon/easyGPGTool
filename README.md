@@ -107,5 +107,3 @@ python -m ensurepip
 pip install --upgrade pip setuptools wheel 
 pip install easyGPGTool
 ```
-## Acknowledgements🙏
-This README.md file was improved with the assistance of Bing. 😊
